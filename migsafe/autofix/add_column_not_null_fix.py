@@ -168,9 +168,7 @@ class AddColumnNotNullFix(Autofix):
 
         return ast.Expr(value=execute_call)
 
-    def _create_alter_column_statement(
-        self, table_name: str, column_name: str, original_add_column_call: ast.Call
-    ) -> ast.Expr:
+    def _create_alter_column_statement(self, table_name: str, column_name: str, original_add_column_call: ast.Call) -> ast.Expr:
         """Creates alter_column operation to set NOT NULL."""
         # Extract schema from original call (simplified logic)
         schema_node = self._extract_schema_node(original_add_column_call)

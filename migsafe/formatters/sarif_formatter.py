@@ -136,9 +136,7 @@ class SarifFormatter(Formatter):
                 "name": "Add Column Not Null",
                 "shortDescription": {"text": "Adding column with NOT NULL without default value"},
                 "fullDescription": {
-                    "text": (
-                        "Adding a column with NOT NULL constraint without a default value can lock the table in production."
-                    )
+                    "text": ("Adding a column with NOT NULL constraint without a default value can lock the table in production.")
                 },
                 "helpUri": "https://github.com/SuccubHunter/migsafe/docs/rules/MIG001",
             },
@@ -200,9 +198,7 @@ class SarifFormatter(Formatter):
                 "id": self.ISSUE_TYPE_TO_RULE_ID[IssueType.SQL_DROP_TABLE],
                 "name": "SQL Drop Table",
                 "shortDescription": {"text": "SQL: Dropping table"},
-                "fullDescription": {
-                    "text": "SQL operation DROP TABLE removes the table and all data. Requires special caution."
-                },
+                "fullDescription": {"text": "SQL operation DROP TABLE removes the table and all data. Requires special caution."},
                 "helpUri": "https://github.com/SuccubHunter/migsafe/docs/rules/MIG009",
             },
             IssueType.SQL_DROP_COLUMN: {

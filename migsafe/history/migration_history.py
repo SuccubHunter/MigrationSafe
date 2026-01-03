@@ -102,9 +102,7 @@ class MigrationHistory:
         if max_commits is not None and max_commits < 0:
             raise ValueError("max_commits cannot be negative")
         # Get file change history with filters
-        commits = self.analyzer.get_file_history(
-            migration_path, since=since, until=until, author=author, max_commits=max_commits
-        )
+        commits = self.analyzer.get_file_history(migration_path, since=since, until=until, author=author, max_commits=max_commits)
 
         # Log if no changes
         if not commits:

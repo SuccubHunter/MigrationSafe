@@ -201,9 +201,7 @@ def test_issue_with_execute_raw_sql():
 def test_issue_empty_strings():
     """Test Issue with empty strings in message and recommendation."""
     # Empty strings should be valid (Pydantic doesn't forbid them by default)
-    issue = Issue(
-        severity=IssueSeverity.OK, type=IssueType.ADD_COLUMN_NOT_NULL, message="", operation_index=0, recommendation=""
-    )
+    issue = Issue(severity=IssueSeverity.OK, type=IssueType.ADD_COLUMN_NOT_NULL, message="", operation_index=0, recommendation="")
 
     assert issue.message == ""
     assert issue.recommendation == ""

@@ -5,7 +5,8 @@ providing common functionality for validation, normalization and analysis.
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, List, Pattern
+from re import Pattern
+from typing import Dict, List
 
 from ..models import Issue
 from .sql_utils import normalize_sql, validate_sql_input

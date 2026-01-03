@@ -96,9 +96,8 @@ def test_git_history_analyzer_initialization_invalid_path():
 @pytest.mark.skipif(not GIT_AVAILABLE, reason="GitPython is not installed")
 def test_git_history_analyzer_initialization_not_git_repo():
     """Test initialization with path that is not a Git repository."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        with pytest.raises(InvalidGitRepositoryError):
-            GitHistoryAnalyzer(tmpdir)
+    with tempfile.TemporaryDirectory() as tmpdir, pytest.raises(InvalidGitRepositoryError):
+        GitHistoryAnalyzer(tmpdir)
 
 
 @pytest.mark.skipif(not GIT_AVAILABLE, reason="GitPython is not installed")
@@ -176,9 +175,8 @@ def test_git_history_analyzer_get_diff(temp_repo):
 @pytest.mark.skipif(not GIT_AVAILABLE, reason="GitPython is not installed")
 def test_git_history_analyzer_handles_missing_git():
     """Test handling missing Git repository."""
-    with tempfile.TemporaryDirectory() as tmpdir:
-        with pytest.raises(InvalidGitRepositoryError):
-            GitHistoryAnalyzer(tmpdir)
+    with tempfile.TemporaryDirectory() as tmpdir, pytest.raises(InvalidGitRepositoryError):
+        GitHistoryAnalyzer(tmpdir)
 
 
 # ==================== Tests for MigrationHistory ====================

@@ -44,9 +44,7 @@ class TestSnapshotExecutorIntegration:
             # Cleanup
             executor.cleanup()
 
-    def test_integration_snapshot_executor_with_real_db(
-        self, test_db_url: str, test_db_available: bool, temp_snapshot_dir: Path
-    ):
+    def test_integration_snapshot_executor_with_real_db(self, test_db_url: str, test_db_available: bool, temp_snapshot_dir: Path):
         """Integration with real test PostgreSQL database."""
         if not test_db_available:
             pytest.skip("Test database is unavailable")
@@ -102,9 +100,7 @@ class TestSnapshotExecutorIntegration:
         finally:
             executor.cleanup()
 
-    def test_integration_lock_detector_with_real_locks(
-        self, test_db_url: str, test_db_available: bool, temp_snapshot_dir: Path
-    ):
+    def test_integration_lock_detector_with_real_locks(self, test_db_url: str, test_db_available: bool, temp_snapshot_dir: Path):
         """Integration of LockDetector with real locks."""
         if not test_db_available:
             pytest.skip("Test database is unavailable")
@@ -140,7 +136,7 @@ class TestSnapshotExecutorIntegration:
 
                 # Check for monitoring method
                 assert hasattr(runner.lock_detector, "monitor_locks")
-                assert callable(getattr(runner.lock_detector, "monitor_locks"))
+                assert callable(runner.lock_detector.monitor_locks)
 
             finally:
                 conn.close()
@@ -148,9 +144,7 @@ class TestSnapshotExecutorIntegration:
         finally:
             executor.cleanup()
 
-    def test_integration_performance_metrics_collection(
-        self, test_db_url: str, test_db_available: bool, temp_snapshot_dir: Path
-    ):
+    def test_integration_performance_metrics_collection(self, test_db_url: str, test_db_available: bool, temp_snapshot_dir: Path):
         """Integration of PerformanceMetrics with real database."""
         if not test_db_available:
             pytest.skip("Test database is unavailable")

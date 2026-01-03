@@ -322,9 +322,7 @@ class MigrationTrendAnalyzer:
 
         # Recommendations for problematic patterns
         if stats.problematic_patterns:
-            recommendations.append(
-                f"Found {len(stats.problematic_patterns)} problematic patterns. Migration review recommended."
-            )
+            recommendations.append(f"Found {len(stats.problematic_patterns)} problematic patterns. Migration review recommended.")
 
         # Recommendations for hotspots
         hotspots = self.identify_hotspots(history)

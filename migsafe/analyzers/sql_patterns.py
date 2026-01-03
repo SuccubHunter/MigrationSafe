@@ -5,7 +5,8 @@ by various SQL analyzers to avoid code duplication.
 """
 
 import re
-from typing import Dict, Pattern
+from re import Pattern
+from typing import Dict
 
 # Basic patterns for SQL operations
 SQL_OPERATIONS = {
@@ -60,9 +61,7 @@ SQL_SUBQUERY_PATTERNS = {
         r"\bDELETE\s+FROM\s+(\w+)\s+.*?\bWHERE\s+.*?(?:IN|EXISTS|NOT\s+EXISTS)\s*\(\s*SELECT\s+", re.IGNORECASE | re.DOTALL
     ),
     # Correlated subquery (subquery references outer table)
-    "correlated_subquery": re.compile(
-        r"\(\s*SELECT\s+.*?\bWHERE\s+.*?\b(\w+)\.(\w+)\s*=.*?\1\.(\w+)", re.IGNORECASE | re.DOTALL
-    ),
+    "correlated_subquery": re.compile(r"\(\s*SELECT\s+.*?\bWHERE\s+.*?\b(\w+)\.(\w+)\s*=.*?\1\.(\w+)", re.IGNORECASE | re.DOTALL),
 }
 
 # Helper patterns

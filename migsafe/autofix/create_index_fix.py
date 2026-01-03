@@ -120,9 +120,7 @@ class CreateIndexFix(Autofix):
 
     def _is_constant_true(self, node: ast.AST) -> bool:
         """Checks if the node is a True constant."""
-        if isinstance(node, ast.Constant):
-            return node.value is True
-        elif hasattr(ast, "NameConstant") and isinstance(node, ast.NameConstant):
+        if isinstance(node, ast.Constant) or hasattr(ast, "NameConstant") and isinstance(node, ast.NameConstant):
             return node.value is True
         return False
 

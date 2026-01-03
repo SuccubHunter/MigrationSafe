@@ -76,9 +76,7 @@ ISSUE_RECOMMENDATIONS: Dict[IssueType, str] = {
         "DELETE with JOIN can be slow and lock multiple tables. "
         "It is recommended to check performance and use batching for large deletions"
     ),
-    IssueType.SQL_CORRELATED_SUBQUERY: (
-        "Correlated subqueries can be very slow. It is recommended to rewrite using JOIN or CTE"
-    ),
+    IssueType.SQL_CORRELATED_SUBQUERY: ("Correlated subqueries can be very slow. It is recommended to rewrite using JOIN or CTE"),
     IssueType.SQL_SUBQUERY_IN_UPDATE: (
         "Subqueries in UPDATE can be slow and lock tables. It is recommended to rewrite using JOIN or temporary tables"
     ),
@@ -97,8 +95,7 @@ ISSUE_RECOMMENDATIONS: Dict[IssueType, str] = {
         "Large CTEs can consume a lot of memory. It is recommended to split into multiple queries or use temporary tables"
     ),
     IssueType.SQL_CTE_IN_MIGRATION: (
-        "CTEs in migrations can be complex to debug. "
-        "It is recommended to check performance and consider using temporary tables"
+        "CTEs in migrations can be complex to debug. It is recommended to check performance and consider using temporary tables"
     ),
 }
 
@@ -141,9 +138,7 @@ class RecommendationsGenerator:
         recommendations = []
 
         if stats.total_issues == 0:
-            recommendations.append(
-                {"type": "success", "message": "Excellent! No issues found in migrations.", "priority": "low"}
-            )
+            recommendations.append({"type": "success", "message": "Excellent! No issues found in migrations.", "priority": "low"})
             return recommendations
 
         # Top issues

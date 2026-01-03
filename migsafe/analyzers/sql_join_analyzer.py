@@ -1,7 +1,8 @@
 """JOIN operations analyzer for SQL queries."""
 
 import re
-from typing import Dict, List, Pattern
+from re import Pattern
+from typing import Dict, List
 
 from ..models import Issue, IssueSeverity, IssueType
 from .base_sql_analyzer import BaseSqlAnalyzer

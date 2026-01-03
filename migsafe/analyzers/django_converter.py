@@ -194,9 +194,7 @@ class DjangoOperationConverter:
 
         # Validation: model_name and field_name are required
         if not model_name or not field_name:
-            logger.debug(
-                f"Failed to extract required parameters for AddField: model_name={model_name}, field_name={field_name}"
-            )
+            logger.debug(f"Failed to extract required parameters for AddField: model_name={model_name}, field_name={field_name}")
             return None
 
         # Validation: table must be defined
@@ -238,9 +236,7 @@ class DjangoOperationConverter:
         # (e.g., TextField without explicit specification) this may be incorrect
 
         # Create MigrationOp with metadata
-        migration_op = MigrationOp(
-            type="add_column", table=table, column=field_name, nullable=nullable, column_type=column_type
-        )
+        migration_op = MigrationOp(type="add_column", table=table, column=field_name, nullable=nullable, column_type=column_type)
 
         # Save default in metadata (if model needs to be extended)
         # For now, use existing fields

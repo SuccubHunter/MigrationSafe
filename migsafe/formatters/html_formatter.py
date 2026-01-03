@@ -228,9 +228,7 @@ class HtmlFormatter(Formatter):
         issues_html = []
         for issue in issues:
             severity_class = f"issue-{issue.severity.value}"
-            emoji = {IssueSeverity.CRITICAL: "🔴", IssueSeverity.WARNING: "🟡", IssueSeverity.OK: "🟢"}.get(
-                issue.severity, "⚪"
-            )
+            emoji = {IssueSeverity.CRITICAL: "🔴", IssueSeverity.WARNING: "🟡", IssueSeverity.OK: "🟢"}.get(issue.severity, "⚪")
 
             type_name = self._format_issue_type_name(issue)
 

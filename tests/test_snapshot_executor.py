@@ -142,11 +142,10 @@ class TestSnapshotExecutor:
                 )
                 executor.snapshots["test_snapshot"] = metadata
 
-                with patch.object(Path, "exists", return_value=True):
-                    with patch.object(Path, "unlink"):
-                        executor.delete_snapshot("test_snapshot")
+                with patch.object(Path, "exists", return_value=True), patch.object(Path, "unlink"):
+                    executor.delete_snapshot("test_snapshot")
 
-                        assert "test_snapshot" not in executor.snapshots
+                    assert "test_snapshot" not in executor.snapshots
 
 
 class TestLockDetector:

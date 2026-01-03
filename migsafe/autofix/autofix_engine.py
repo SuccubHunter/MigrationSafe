@@ -55,9 +55,7 @@ class AutofixEngine:
         """
         return [fix for fix in self._fixes if fix.can_fix(issue)]
 
-    def apply_fixes(
-        self, source_code: str, issues: List[Issue], dry_run: bool = False
-    ) -> Tuple[str, List[Issue], List[Issue]]:
+    def apply_fixes(self, source_code: str, issues: List[Issue], dry_run: bool = False) -> Tuple[str, List[Issue], List[Issue]]:
         """
         Applies fixes to migration source code.
 

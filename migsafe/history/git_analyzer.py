@@ -439,9 +439,7 @@ class GitHistoryAnalyzer:
                     author=commit.author.name if hasattr(commit, "author") and hasattr(commit.author, "name") else "",
                     date=commit.committed_datetime.isoformat() if hasattr(commit, "committed_datetime") else "",
                     message=commit.message.strip() if hasattr(commit, "message") else "",
-                    files=list(commit.stats.files.keys())
-                    if hasattr(commit, "stats") and hasattr(commit.stats, "files")
-                    else [],
+                    files=list(commit.stats.files.keys()) if hasattr(commit, "stats") and hasattr(commit.stats, "files") else [],
                 )
 
                 # Analyze changes in commit
@@ -469,9 +467,7 @@ class GitHistoryAnalyzer:
                         change_type = "modified"
                         diff = None
 
-                    changes.append(
-                        MigrationChange(file_path=file_path, commit=commit_info, change_type=change_type, diff=diff)
-                    )
+                    changes.append(MigrationChange(file_path=file_path, commit=commit_info, change_type=change_type, diff=diff))
             except (GitCommandError, ValueError, AttributeError) as e:
                 error_count += 1
                 logger.warning(f"Error analyzing commit {commit_hash}: {e}")

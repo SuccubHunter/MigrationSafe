@@ -454,9 +454,7 @@ def show_diff(original: str, fixed: str, file_path: Path) -> None:
 
     click.echo("\n📝 Changes in file:")
     for line in diff:
-        if line.startswith("---") or line.startswith("+++"):
-            click.echo(line, err=True)
-        elif line.startswith("@@"):
+        if line.startswith("---") or line.startswith("+++") or line.startswith("@@"):
             click.echo(line, err=True)
         elif line.startswith("+"):
             click.echo(click.style(line, fg="green"), err=True)

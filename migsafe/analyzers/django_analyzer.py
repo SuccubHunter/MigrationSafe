@@ -151,9 +151,7 @@ class DjangoMigrationAnalyzer(MigrationAnalyzer):
                         ),
                         operation_index=idx,
                         table=op.table,
-                        recommendation=(
-                            "Check actual table name in Django model (model._meta.db_table) for accurate analysis"
-                        ),
+                        recommendation=("Check actual table name in Django model (model._meta.db_table) for accurate analysis"),
                     )
                 )
 
