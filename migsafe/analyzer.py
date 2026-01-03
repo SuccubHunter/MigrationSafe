@@ -107,10 +107,10 @@ class AlembicASTAnalyzer(ast.NodeVisitor):
                     for stmt in node.body:
                         self.visit(stmt)
 
-                        # Remove from context after exiting block
-                        if batch_var in self.batch_context:
-                            del self.batch_context[batch_var]
-                        return
+                    # Remove from context after exiting block
+                    if batch_var in self.batch_context:
+                        del self.batch_context[batch_var]
+                    return
 
         # Regular with block, process as usual
         self.generic_visit(node)

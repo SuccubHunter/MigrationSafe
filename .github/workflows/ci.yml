@@ -44,11 +44,6 @@ jobs:
         run: |
           ruff check migsafe tests
       
-      - name: Run flake8 (style checking)
-        run: |
-          flake8 migsafe tests --count --select=E9,F63,F7,F82 --show-source --statistics
-          flake8 migsafe tests --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      
       - name: Run mypy (type checking)
         run: |
           mypy migsafe --ignore-missing-imports --no-strict-optional || true
