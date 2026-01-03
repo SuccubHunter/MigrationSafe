@@ -6,10 +6,10 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Code Style](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![CI](https://github.com/SuccubHunter/MigrationSafe/workflows/CI/badge.svg)](https://github.com/SuccubHunter/MigrationSafe/actions)
-[![PyPI version](https://badge.fury.io/py/MigrationSafe.svg)](https://pypi.org/project/migsafe/0.4.0/)
+[![PyPI](https://img.shields.io/pypi/v/migsafe.svg)](https://pypi.org/project/migsafe/)
 [![Codecov](https://codecov.io/gh/SuccubHunter/MigrationSafe/branch/main/graph/badge.svg)](https://codecov.io/gh/SuccubHunter/MigrationSafe)
 
-**migsafe** (v0.4.0) is a CLI tool and CI linter that analyzes Alembic and Django migrations before they are applied and warns about dangerous, slow, and blocking schema changes.
+**migsafe** (v0.4.1) is a CLI tool and CI linter that analyzes Alembic and Django migrations before they are applied and warns about dangerous, slow, and blocking schema changes.
 
 **Project goal** — catch migration problems before deployment, not during production downtime.
 
@@ -104,7 +104,7 @@ pip install -e .
 pip install -e ".[executors,formatters]"
 ```
 
-**Requirements:** Python >= 3.8
+**Requirements:** Python >= 3.9
 
 **Optional dependencies:**
 - `executors` — for `migsafe execute` (requires `psycopg2-binary`, `alembic`, `sqlalchemy`)
