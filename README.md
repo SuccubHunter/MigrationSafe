@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Code Style](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 [![CI](https://github.com/SuccubHunter/MigrationSafe/workflows/CI/badge.svg)](https://github.com/SuccubHunter/MigrationSafe/actions)
-[![PyPI version](https://badge.fury.io/py/MigrationSafe.svg)](https://badge.fury.io/py/MigrationSafe)
+[![PyPI version](https://badge.fury.io/py/MigrationSafe.svg)](https://pypi.org/project/migsafe/0.4.0/)
 [![Codecov](https://codecov.io/gh/SuccubHunter/MigrationSafe/branch/main/graph/badge.svg)](https://codecov.io/gh/SuccubHunter/MigrationSafe)
 
 **migsafe** (v0.4.0) is a CLI tool and CI linter that analyzes Alembic and Django migrations before they are applied and warns about dangerous, slow, and blocking schema changes.
