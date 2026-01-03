@@ -2,7 +2,6 @@
 
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, List, Tuple
 from xml.sax.saxutils import escape as xml_escape
 
 from ..base import AnalyzerResult
@@ -13,7 +12,7 @@ from .base import Formatter
 class JUnitFormatter(Formatter):
     """JUnit XML formatter for CI/CD systems."""
 
-    def _count_issues_by_severity(self, issues: List[Issue]) -> Dict[str, int]:
+    def _count_issues_by_severity(self, issues: list[Issue]) -> dict[str, int]:
         """
         Count issues by severity levels.
 
@@ -27,7 +26,7 @@ class JUnitFormatter(Formatter):
         warning_count = sum(1 for issue in issues if issue.severity == IssueSeverity.WARNING)
         return {"critical": critical_count, "warning": warning_count}
 
-    def format(self, results: List[Tuple[Path, AnalyzerResult]]) -> str:
+    def format(self, results: list[tuple[Path, AnalyzerResult]]) -> str:
         """Format analysis results as JUnit XML."""
         try:
             root = ET.Element("testsuites")
@@ -157,7 +156,7 @@ class JUnitFormatter(Formatter):
         except Exception as e:
             raise RuntimeError(f"Error formatting JUnit XML: {e}") from e
 
-    def _format_issues_summary(self, issues: List[Issue], critical: bool = False, warning: bool = False) -> str:
+    def _format_issues_summary(self, issues: list[Issue], critical: bool = False, warning: bool = False) -> str:
         """Format issues summary for JUnit."""
         filtered = issues
         if critical:

@@ -140,6 +140,6 @@ def downgrade():
                 # All formatters expect List[Tuple[Path, AnalyzerResult]]
                 output = formatter.format([(test_file, result)])
                 assert output is not None
-                assert isinstance(output, str) or isinstance(output, bytes)
+                assert isinstance(output, (str, bytes))
             except Exception as e:
                 pytest.fail(f"Formatter {formatter.__class__.__name__} is not working: {e}")

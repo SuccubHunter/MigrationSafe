@@ -1,7 +1,6 @@
 """SQL query analyzer for detecting dangerous patterns."""
 
 import re
-from typing import List
 
 from ..models import Issue, IssueSeverity, IssueType
 from .sql_cte_analyzer import SqlCteAnalyzer
@@ -66,7 +65,7 @@ class SqlAnalyzer:
             "insert_select_pattern": common_patterns["insert_select"],
         }
 
-    def analyze(self, sql: str, operation_index: int) -> List[Issue]:
+    def analyze(self, sql: str, operation_index: int) -> list[Issue]:
         """
         Analyze SQL query and return list of found issues.
 
@@ -112,7 +111,7 @@ class SqlAnalyzer:
 
         return issues
 
-    def _check_alter_add_not_null(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_alter_add_not_null(self, sql: str, operation_index: int) -> list[Issue]:
         """Check ALTER TABLE ADD COLUMN NOT NULL."""
         issues = []
         matches = self._patterns["alter_add_not_null"].finditer(sql)
@@ -142,7 +141,7 @@ class SqlAnalyzer:
 
         return issues
 
-    def _check_create_index_no_concurrent(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_create_index_no_concurrent(self, sql: str, operation_index: int) -> list[Issue]:
         """Check CREATE INDEX without CONCURRENTLY."""
         issues = []
         matches = self._patterns["create_index_no_concurrent"].finditer(sql)
@@ -168,7 +167,7 @@ class SqlAnalyzer:
 
         return issues
 
-    def _check_drop_table(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_drop_table(self, sql: str, operation_index: int) -> list[Issue]:
         """Check DROP TABLE."""
         issues = []
         matches = self._patterns["drop_table"].finditer(sql)
@@ -199,7 +198,7 @@ class SqlAnalyzer:
 
         return issues
 
-    def _check_drop_column(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_drop_column(self, sql: str, operation_index: int) -> list[Issue]:
         """Check DROP COLUMN."""
         issues = []
         matches = self._patterns["drop_column"].finditer(sql)
@@ -228,7 +227,7 @@ class SqlAnalyzer:
 
         return issues
 
-    def _check_alter_column_type(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_alter_column_type(self, sql: str, operation_index: int) -> list[Issue]:
         """Check ALTER TABLE ... ALTER COLUMN TYPE."""
         issues = []
         matches = self._patterns["alter_column_type"].finditer(sql)
@@ -257,7 +256,7 @@ class SqlAnalyzer:
 
         return issues
 
-    def _check_update_no_where(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_update_no_where(self, sql: str, operation_index: int) -> list[Issue]:
         """Check UPDATE without WHERE or with WHERE 1=1."""
         issues = []
         # Find all UPDATE queries
@@ -307,7 +306,7 @@ class SqlAnalyzer:
 
         return issues
 
-    def _check_delete_no_where(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_delete_no_where(self, sql: str, operation_index: int) -> list[Issue]:
         """Check DELETE without WHERE."""
         issues = []
         # Find all DELETE queries
@@ -338,7 +337,7 @@ class SqlAnalyzer:
 
         return issues
 
-    def _check_insert_without_batching(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_insert_without_batching(self, sql: str, operation_index: int) -> list[Issue]:
         """Check INSERT ... SELECT without LIMIT (large INSERT without batching)."""
         issues = []
         # Find all INSERT ... SELECT queries
@@ -383,7 +382,7 @@ class SqlAnalyzer:
 
         return issues
 
-    def _check_lock_table(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_lock_table(self, sql: str, operation_index: int) -> list[Issue]:
         """Check LOCK TABLE."""
         issues = []
         matches = self._patterns["lock_table"].finditer(sql)
@@ -410,7 +409,7 @@ class SqlAnalyzer:
 
         return issues
 
-    def _check_truncate_table(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_truncate_table(self, sql: str, operation_index: int) -> list[Issue]:
         """Check TRUNCATE TABLE."""
         issues = []
         matches = self._patterns["truncate_table"].finditer(sql)

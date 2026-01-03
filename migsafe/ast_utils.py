@@ -1,10 +1,10 @@
 """Utilities for safe evaluation of AST values without code execution."""
 
 import ast
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
-def safe_eval_string(node: ast.AST, context: Optional[Dict[str, Any]] = None) -> Optional[str]:
+def safe_eval_string(node: ast.AST, context: Optional[dict[str, Any]] = None) -> Optional[str]:
     """
     Safely extracts a string value from an AST node.
 
@@ -58,7 +58,7 @@ def safe_eval_string(node: ast.AST, context: Optional[Dict[str, Any]] = None) ->
     return None
 
 
-def safe_eval_bool(node: ast.AST, context: Optional[Dict[str, Any]] = None) -> Optional[bool]:
+def safe_eval_bool(node: ast.AST, context: Optional[dict[str, Any]] = None) -> Optional[bool]:
     """
     Safely extracts a boolean value from an AST node.
 
@@ -90,7 +90,7 @@ def safe_eval_bool(node: ast.AST, context: Optional[Dict[str, Any]] = None) -> O
     return None
 
 
-def extract_keyword_arg(call: ast.Call, name: str, context: Optional[Dict[str, Any]] = None) -> Optional[Any]:
+def extract_keyword_arg(call: ast.Call, name: str, context: Optional[dict[str, Any]] = None) -> Optional[Any]:
     """
     Extracts the value of a keyword argument from a function call.
 
@@ -120,7 +120,7 @@ def extract_keyword_arg(call: ast.Call, name: str, context: Optional[Dict[str, A
     return None
 
 
-def extract_positional_arg(call: ast.Call, index: int, context: Optional[Dict[str, Any]] = None) -> Optional[str]:
+def extract_positional_arg(call: ast.Call, index: int, context: Optional[dict[str, Any]] = None) -> Optional[str]:
     """
     Extracts a positional argument from a function call by index.
 

@@ -5,7 +5,6 @@ for working with different types of migrations (Alembic, Django, etc.).
 """
 
 from abc import ABC, abstractmethod
-from typing import List
 
 from pydantic import BaseModel
 
@@ -89,8 +88,8 @@ class AnalyzerResult(BaseModel):
         1
     """
 
-    operations: List[MigrationOp]
-    issues: List[Issue]
+    operations: list[MigrationOp]
+    issues: list[Issue]
 
 
 class MigrationAnalyzer(ABC):

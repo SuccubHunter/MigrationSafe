@@ -2,7 +2,7 @@
 
 import ast
 from abc import ABC, abstractmethod
-from typing import Dict, Optional
+from typing import Optional
 
 
 class BaseOperationFinder(ast.NodeVisitor, ABC):
@@ -23,7 +23,7 @@ class BaseOperationFinder(ast.NodeVisitor, ABC):
         self.current_index = 0
         self.found_call: Optional[ast.Call] = None
         self.found_stmt_index: Optional[int] = None
-        self.batch_context: Dict[str, str] = {}  # batch_var -> table_name
+        self.batch_context: dict[str, str] = {}  # batch_var -> table_name
         self.operation_name = operation_name
         self._current_stmt_index: Optional[int] = None
 
@@ -37,30 +37,31 @@ class BaseOperationFinder(ast.NodeVisitor, ABC):
     def visit_With(self, node: ast.With):
         """Processes with-blocks (batch_alter_table)."""
         for item in node.items:
-            if isinstance(item.context_expr, ast.Call):
-                if isinstance(item.context_expr.func, ast.Attribute):
-                    if (
-                        isinstance(item.context_expr.func.value, ast.Name)
-                        and item.context_expr.func.value.id == "op"
-                        and item.context_expr.func.attr == "batch_alter_table"
-                    ):
-                        # Extract table name from first argument
-                        table_name = self._extract_table_name(item.context_expr.args[0] if item.context_expr.args else None)
+            if (
+                isinstance(item.context_expr, ast.Call)
+                and isinstance(item.context_expr.func, ast.Attribute)
+                and (
+                    isinstance(item.context_expr.func.value, ast.Name)
+                    and item.context_expr.func.value.id == "op"
+                    and item.context_expr.func.attr == "batch_alter_table"
+                )
+            ):
+                # Extract table name from first argument
+                table_name = self._extract_table_name(item.context_expr.args[0] if item.context_expr.args else None)
 
-                        if table_name and item.optional_vars is not None:
-                            # Save batch_var -> table mapping
-                            if isinstance(item.optional_vars, ast.Name):
-                                batch_var = item.optional_vars.id
-                                self.batch_context[batch_var] = table_name
+                if table_name and item.optional_vars is not None and isinstance(item.optional_vars, ast.Name):
+                    # Save batch_var -> table mapping
+                    batch_var = item.optional_vars.id
+                    self.batch_context[batch_var] = table_name
 
-                                # Process with-block body
-                                for stmt in node.body:
-                                    self.visit(stmt)
+                    # Process with-block body
+                    for stmt in node.body:
+                        self.visit(stmt)
 
-                                # Remove from context after exiting the block
-                                if batch_var in self.batch_context:
-                                    del self.batch_context[batch_var]
-                                return
+                    # Remove from context after exiting the block
+                    if batch_var in self.batch_context:
+                        del self.batch_context[batch_var]
+                    return
 
         # Regular with-block, process as usual
         self.generic_visit(node)

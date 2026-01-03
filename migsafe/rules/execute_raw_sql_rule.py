@@ -1,7 +1,5 @@
 """Rule for checking EXECUTE with raw SQL."""
 
-from typing import List
-
 from ..models import Issue, IssueSeverity, IssueType, MigrationOp
 from .base import Rule
 
@@ -15,7 +13,7 @@ class ExecuteRawSqlRule(Rule):
 
     name = "execute_raw_sql"
 
-    def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+    def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
         """Checks execute operation for use of raw SQL.
 
         Args:
@@ -27,7 +25,7 @@ class ExecuteRawSqlRule(Rule):
             List of found issues (Issue). Returns empty list,
             if operation is not related to execute.
         """
-        issues: List[Issue] = []
+        issues: list[Issue] = []
 
         # Check only execute operations
         if operation.type != "execute":

@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from .. import __version__
 from ..base import AnalyzerResult
@@ -12,10 +12,10 @@ from .base import Formatter
 class JsonFormatter(Formatter):
     """JSON formatter for machine-readable output."""
 
-    def format(self, results: List[Tuple[Path, AnalyzerResult]]) -> str:
+    def format(self, results: list[tuple[Path, AnalyzerResult]]) -> str:
         """Format analysis results as JSON."""
         try:
-            output: Dict[str, Any] = {
+            output: dict[str, Any] = {
                 "version": __version__,
                 "summary": {"total_migrations": len(results), "total_issues": 0, "critical": 0, "warning": 0, "ok": 0},
                 "migrations": [],
@@ -53,10 +53,6 @@ class JsonFormatter(Formatter):
             return json.dumps(output, ensure_ascii=False, indent=2)
         except (TypeError, ValueError) as e:
             raise ValueError(f"Data validation error when formatting JSON: {e}") from e
-        except (TypeError, ValueError) as e:
-            if isinstance(e, ValueError):
-                raise RuntimeError(f"Error encoding JSON: {e}") from e
-            raise
         except Exception as e:
             raise RuntimeError(f"Error formatting JSON: {e}") from e
 
@@ -87,14 +83,10 @@ class JsonFormatter(Formatter):
             return json.dumps(output, ensure_ascii=False, indent=2)
         except (TypeError, ValueError) as e:
             raise ValueError(f"Data validation error when formatting JSON: {e}") from e
-        except (TypeError, ValueError) as e:
-            if isinstance(e, ValueError):
-                raise RuntimeError(f"Error encoding JSON: {e}") from e
-            raise
         except Exception as e:
             raise RuntimeError(f"Error formatting JSON: {e}") from e
 
-    def _issue_to_dict(self, issue) -> Dict[str, Any]:
+    def _issue_to_dict(self, issue) -> dict[str, Any]:
         """Convert Issue to dictionary."""
         return {
             "severity": issue.severity.value,

@@ -2,7 +2,7 @@
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import Optional
 
 from .base import Plugin
 from .types import PluginMetrics
@@ -35,7 +35,7 @@ class BasePluginLoader(ABC):
         self._source_name = self.__class__.__name__
 
     @abstractmethod
-    def load(self) -> List[Plugin]:
+    def load(self) -> list[Plugin]:
         """Load plugins from source.
 
         Returns:

@@ -3,7 +3,7 @@
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TypedDict
+from typing import Any, Callable, Optional, TypedDict
 
 from ..base import AnalyzerResult
 from ..models import IssueSeverity, IssueType
@@ -17,9 +17,9 @@ class SummaryDict(TypedDict):
 
     total_migrations: int
     total_issues: int
-    by_severity: Dict[str, int]
-    by_type: Dict[str, int]
-    by_rule: Dict[str, int]
+    by_severity: dict[str, int]
+    by_type: dict[str, int]
+    by_rule: dict[str, int]
 
 
 class MigrationStats:
@@ -29,10 +29,10 @@ class MigrationStats:
         """Initializes the statistics object."""
         self.total_migrations = 0
         self.total_issues = 0
-        self.by_severity: Dict[IssueSeverity, int] = defaultdict(int)
-        self.by_type: Dict[IssueType, int] = defaultdict(int)
-        self.by_rule: Dict[str, int] = defaultdict(int)
-        self.migrations: List[Dict[str, Any]] = []
+        self.by_severity: dict[IssueSeverity, int] = defaultdict(int)
+        self.by_type: dict[IssueType, int] = defaultdict(int)
+        self.by_rule: dict[str, int] = defaultdict(int)
+        self.migrations: list[dict[str, Any]] = []
 
     def add_migration(self, file_path: Path, result: AnalyzerResult) -> None:
         """
@@ -62,9 +62,9 @@ class MigrationStats:
         issues_count = len(result.issues)
 
         # Statistics by severity for this migration
-        issues_by_severity: Dict[str, int] = defaultdict(int)
-        issues_by_type: Dict[str, int] = defaultdict(int)
-        operations_by_type: Dict[str, int] = defaultdict(int)
+        issues_by_severity: dict[str, int] = defaultdict(int)
+        issues_by_type: dict[str, int] = defaultdict(int)
+        operations_by_type: dict[str, int] = defaultdict(int)
 
         # Count operations by type
         for op in result.operations:
@@ -72,7 +72,7 @@ class MigrationStats:
 
         # Count issues
         # Store detailed information about issues for correct filtering
-        issues_detail: List[Dict[str, Any]] = []
+        issues_detail: list[dict[str, Any]] = []
 
         for issue in result.issues:
             self.total_issues += 1
@@ -117,7 +117,7 @@ class MigrationStats:
             "by_rule": dict(self.by_rule),
         }
 
-    def get_top_issues(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_top_issues(self, limit: int = 10) -> list[dict[str, Any]]:
         """
         Returns top issues by frequency.
 
@@ -136,7 +136,7 @@ class MigrationStats:
 
         return result
 
-    def get_top_rules(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_top_rules(self, limit: int = 10) -> list[dict[str, Any]]:
         """
         Returns top rules by number of triggers.
 
@@ -226,7 +226,7 @@ class MigrationStats:
         return filtered
 
     def _filter_issues(
-        self, predicate: Callable[[Dict[str, Any]], bool], severity_filter: Optional[IssueSeverity] = None
+        self, predicate: Callable[[dict[str, Any]], bool], severity_filter: Optional[IssueSeverity] = None
     ) -> "MigrationStats":
         """
         General method for filtering issues by predicate.
@@ -250,8 +250,8 @@ class MigrationStats:
 
                 if filtered_issues:
                     # Recalculate statistics for filtered issues
-                    filtered_issues_by_severity: Dict[str, int] = defaultdict(int)
-                    filtered_issues_by_type: Dict[str, int] = defaultdict(int)
+                    filtered_issues_by_severity: dict[str, int] = defaultdict(int)
+                    filtered_issues_by_type: dict[str, int] = defaultdict(int)
 
                     for issue in filtered_issues:
                         try:
@@ -367,8 +367,8 @@ class MigrationStats:
             else:
                 # Fallback for old data without detailed information
                 filtered_issues_count = 0
-                filtered_issues_by_type: Dict[str, int] = defaultdict(int)
-                filtered_issues_by_severity: Dict[str, int] = defaultdict(int)
+                filtered_issues_by_type: dict[str, int] = defaultdict(int)
+                filtered_issues_by_severity: dict[str, int] = defaultdict(int)
 
                 # Count total number of issues by relevant types
                 total_relevant_issues = sum(

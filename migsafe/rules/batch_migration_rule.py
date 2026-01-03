@@ -2,7 +2,6 @@
 
 import logging
 import re
-from typing import List
 
 from ..models import Issue, IssueSeverity, IssueType, MigrationOp
 from .base import Rule
@@ -83,7 +82,7 @@ class BatchMigrationRule(Rule):
             ),
         }
 
-    def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+    def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
         """Check execute operation for large data migrations without batching.
 
         Args:
@@ -95,7 +94,7 @@ class BatchMigrationRule(Rule):
             List of found issues (Issue). Returns empty list
             if operation is not execute type or doesn't contain dangerous patterns.
         """
-        issues: List[Issue] = []
+        issues: list[Issue] = []
 
         # Check only execute operations
         if operation.type != "execute":
@@ -172,10 +171,7 @@ class BatchMigrationRule(Rule):
         exists_pattern = re.search(
             r"\bWHERE\s+EXISTS\s*\(\s*SELECT\s+.*?\bLIMIT\s+\d+(?:\s+OFFSET\s+\d+)?\s*\)", sql_part, re.IGNORECASE | re.DOTALL
         )
-        if exists_pattern:
-            return True
-
-        return False
+        return bool(exists_pattern)
 
     def _is_specific_condition(self, where_part: str) -> bool:
         """Check if WHERE condition is "specific" (affects few rows).
@@ -250,7 +246,7 @@ class BatchMigrationRule(Rule):
             all_parts_specific = True
             has_specific_part = False
 
-            for i, part in enumerate(parts):
+            for _i, part in enumerate(parts):
                 # Skip separators (AND/OR)
                 if part.upper() in ("AND", "OR"):
                     continue
@@ -302,7 +298,7 @@ class BatchMigrationRule(Rule):
 
         return False
 
-    def _check_update_operations(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_update_operations(self, sql: str, operation_index: int) -> list[Issue]:
         """Check UPDATE operations for missing batching.
 
         Detects:
@@ -430,7 +426,7 @@ class BatchMigrationRule(Rule):
 
         return issues
 
-    def _check_delete_operations(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_delete_operations(self, sql: str, operation_index: int) -> list[Issue]:
         """Check DELETE operations for missing batching.
 
         Detects:

@@ -6,7 +6,6 @@ by various SQL analyzers to avoid code duplication.
 
 import re
 from re import Pattern
-from typing import Dict
 
 # Basic patterns for SQL operations
 SQL_OPERATIONS = {
@@ -75,7 +74,7 @@ SQL_HELPER_PATTERNS = {
 }
 
 
-def get_sql_operation_patterns() -> Dict[str, Pattern]:
+def get_sql_operation_patterns() -> dict[str, Pattern]:
     """Return dictionary with basic SQL operation patterns.
 
     Returns:
@@ -84,7 +83,7 @@ def get_sql_operation_patterns() -> Dict[str, Pattern]:
     return SQL_OPERATIONS.copy()
 
 
-def get_sql_join_patterns() -> Dict[str, Pattern]:
+def get_sql_join_patterns() -> dict[str, Pattern]:
     """Return dictionary with patterns for JOIN operations.
 
     Returns:
@@ -93,7 +92,7 @@ def get_sql_join_patterns() -> Dict[str, Pattern]:
     return SQL_JOIN_PATTERNS.copy()
 
 
-def get_sql_subquery_patterns() -> Dict[str, Pattern]:
+def get_sql_subquery_patterns() -> dict[str, Pattern]:
     """Return dictionary with patterns for subqueries.
 
     Returns:
@@ -102,7 +101,7 @@ def get_sql_subquery_patterns() -> Dict[str, Pattern]:
     return SQL_SUBQUERY_PATTERNS.copy()
 
 
-def get_sql_helper_patterns() -> Dict[str, Pattern]:
+def get_sql_helper_patterns() -> dict[str, Pattern]:
     """Return dictionary with helper patterns.
 
     Returns:

@@ -1,7 +1,7 @@
 """AST analyzer for Alembic migration files."""
 
 import ast
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from .ast_utils import (
     extract_keyword_arg,
@@ -16,11 +16,11 @@ class AlembicASTAnalyzer(ast.NodeVisitor):
     """AST visitor for extracting Alembic migration operations."""
 
     def __init__(self):
-        self.operations: List[MigrationOp] = []
-        self.context: Dict[str, Any] = {}  # Context for variables
-        self.batch_context: Dict[str, str] = {}  # batch_op -> table_name
+        self.operations: list[MigrationOp] = []
+        self.context: dict[str, Any] = {}  # Context for variables
+        self.batch_context: dict[str, str] = {}  # batch_op -> table_name
 
-    def analyze(self, source: str) -> List[MigrationOp]:
+    def analyze(self, source: str) -> list[MigrationOp]:
         """
         Analyze migration source code and return list of operations.
 
@@ -72,45 +72,45 @@ class AlembicASTAnalyzer(ast.NodeVisitor):
     def visit_Call(self, node: ast.Call):
         """Process function calls."""
         # Check if this is an op.* call
-        if isinstance(node.func, ast.Attribute):
-            if isinstance(node.func.value, ast.Name):
-                if node.func.value.id == "op":
-                    self._handle_op_call(node, node.func.attr)
-                elif node.func.value.id in self.batch_context:
-                    # batch_op.* call
-                    batch_var = node.func.value.id
-                    table = self.batch_context.get(batch_var)
-                    if table:
-                        self._handle_batch_op_call(node, node.func.attr, table)
+        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+            if node.func.value.id == "op":
+                self._handle_op_call(node, node.func.attr)
+            elif node.func.value.id in self.batch_context:
+                # batch_op.* call
+                batch_var = node.func.value.id
+                table = self.batch_context.get(batch_var)
+                if table:
+                    self._handle_batch_op_call(node, node.func.attr, table)
 
         self.generic_visit(node)
 
     def visit_With(self, node: ast.With):
         """Process with blocks (batch_alter_table)."""
         for item in node.items:
-            if isinstance(item.context_expr, ast.Call):
-                if isinstance(item.context_expr.func, ast.Attribute):
-                    if (
-                        isinstance(item.context_expr.func.value, ast.Name)
-                        and item.context_expr.func.value.id == "op"
-                        and item.context_expr.func.attr == "batch_alter_table"
-                    ):
-                        # Extract table name
-                        table = extract_positional_arg(item.context_expr, 0, self.context)
-                        if table and item.optional_vars is not None:
-                            # Save batch_op -> table mapping
-                            if isinstance(item.optional_vars, ast.Name):
-                                batch_var = item.optional_vars.id
-                                self.batch_context[batch_var] = table
+            if (
+                isinstance(item.context_expr, ast.Call)
+                and isinstance(item.context_expr.func, ast.Attribute)
+                and (
+                    isinstance(item.context_expr.func.value, ast.Name)
+                    and item.context_expr.func.value.id == "op"
+                    and item.context_expr.func.attr == "batch_alter_table"
+                )
+            ):
+                # Extract table name
+                table = extract_positional_arg(item.context_expr, 0, self.context)
+                if table and item.optional_vars is not None and isinstance(item.optional_vars, ast.Name):
+                    # Save batch_op -> table mapping
+                    batch_var = item.optional_vars.id
+                    self.batch_context[batch_var] = table
 
-                                # Process with block body
-                                for stmt in node.body:
-                                    self.visit(stmt)
+                    # Process with block body
+                    for stmt in node.body:
+                        self.visit(stmt)
 
-                                # Remove from context after exiting block
-                                if batch_var in self.batch_context:
-                                    del self.batch_context[batch_var]
-                                return
+                        # Remove from context after exiting block
+                        if batch_var in self.batch_context:
+                            del self.batch_context[batch_var]
+                        return
 
         # Regular with block, process as usual
         self.generic_visit(node)
@@ -161,13 +161,12 @@ class AlembicASTAnalyzer(ast.NodeVisitor):
         nullable = None
 
         # Extract information from sa.Column(...)
-        if isinstance(column_node, ast.Call):
-            if isinstance(column_node.func, ast.Attribute):
-                # sa.Column("email", ...)
-                column_name = extract_positional_arg(column_node, 0, self.context)
+        if isinstance(column_node, ast.Call) and isinstance(column_node.func, ast.Attribute):
+            # sa.Column("email", ...)
+            column_name = extract_positional_arg(column_node, 0, self.context)
 
-                # Look for nullable in keyword arguments
-                nullable = extract_keyword_arg(column_node, "nullable", self.context)
+            # Look for nullable in keyword arguments
+            nullable = extract_keyword_arg(column_node, "nullable", self.context)
 
         self.operations.append(MigrationOp(type="add_column", table=table, column=column_name, nullable=nullable))
 
@@ -249,10 +248,9 @@ class AlembicASTAnalyzer(ast.NodeVisitor):
                         column_type = keyword.value.func.attr
                 elif isinstance(keyword.value, ast.Attribute):
                     column_type = keyword.value.attr
-                elif isinstance(keyword.value, ast.Name):
+                elif isinstance(keyword.value, ast.Name) and keyword.value.id in self.context:
                     # May be a type variable
-                    if keyword.value.id in self.context:
-                        column_type = str(self.context[keyword.value.id])
+                    column_type = str(self.context[keyword.value.id])
                 break
 
         # Extract nullable if specified
@@ -272,7 +270,7 @@ class AlembicASTAnalyzer(ast.NodeVisitor):
         self.operations.append(MigrationOp(type="execute", raw_sql=sql))
 
 
-def analyze_migration(source: str) -> List[MigrationOp]:
+def analyze_migration(source: str) -> list[MigrationOp]:
     """
     Parse Alembic migration source code and extract operations from upgrade() function.
 

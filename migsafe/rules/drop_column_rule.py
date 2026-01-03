@@ -1,7 +1,5 @@
 """Rule for checking DROP COLUMN."""
 
-from typing import List
-
 from ..models import Issue, IssueSeverity, IssueType, MigrationOp
 from .base import Rule
 
@@ -15,7 +13,7 @@ class DropColumnRule(Rule):
 
     name = "drop_column"
 
-    def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+    def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
         """Checks drop_column operation for potential data loss.
 
         Args:
@@ -27,7 +25,7 @@ class DropColumnRule(Rule):
             List of found issues (Issue). Returns empty list,
             if operation is not related to drop_column.
         """
-        issues: List[Issue] = []
+        issues: list[Issue] = []
 
         # Check only drop_column operations
         if operation.type != "drop_column":
@@ -68,7 +66,7 @@ class DropColumnRule(Rule):
 
         return issues
 
-    def _is_column_not_null(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> bool:
+    def _is_column_not_null(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> bool:
         """Checks if column was defined as NOT NULL in previous operations.
 
         Args:
@@ -92,13 +90,11 @@ class DropColumnRule(Rule):
 
             # Check add_column or alter_column operations for same table and column
             if prev_op.table == operation.table and prev_op.column == operation.column:
-                if prev_op.type == "add_column":
+                if prev_op.type == "add_column" and prev_op.nullable is False:
                     # If column was added with nullable=False, it is NOT NULL
-                    if prev_op.nullable is False:
-                        return True
-                elif prev_op.type == "alter_column":
+                    return True
+                elif prev_op.type == "alter_column" and prev_op.nullable is False:
                     # If column was changed to nullable=False, it is NOT NULL
-                    if prev_op.nullable is False:
-                        return True
+                    return True
 
         return False

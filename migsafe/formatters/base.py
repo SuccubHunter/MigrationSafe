@@ -2,7 +2,7 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Optional
 
 from ..base import AnalyzerResult
 from ..models import Issue, IssueSeverity
@@ -37,7 +37,7 @@ class Formatter(ABC):
         self.verbose = verbose
         self.quiet = quiet
 
-    def filter_issues(self, issues: List[Issue]) -> List[Issue]:
+    def filter_issues(self, issues: list[Issue]) -> list[Issue]:
         """
         Filter issues by severity level and output mode.
 
@@ -79,7 +79,7 @@ class Formatter(ABC):
         return issue.type.value.replace("_", " ").title()
 
     @abstractmethod
-    def format(self, results: List[Tuple[Path, AnalyzerResult]]) -> str:
+    def format(self, results: list[tuple[Path, AnalyzerResult]]) -> str:
         """
         Format analysis results.
 
@@ -119,7 +119,7 @@ class StatsFormatter(ABC):
         self.no_color = no_color
 
     @abstractmethod
-    def format(self, stats: "MigrationStats", recommendations: List[Dict[str, Any]]) -> str:  # noqa: F821
+    def format(self, stats: "MigrationStats", recommendations: list[dict[str, Any]]) -> str:  # noqa: F821
         """
         Format migration statistics.
 

@@ -3,7 +3,7 @@
 import logging
 from collections import OrderedDict
 from datetime import datetime
-from typing import TYPE_CHECKING, Dict, List, Literal, Optional
+from typing import TYPE_CHECKING, Literal, Optional
 
 from pydantic import BaseModel
 
@@ -19,7 +19,7 @@ class HistoryRecord(BaseModel):
     """Record in migration history."""
 
     file_path: str
-    changes: List[MigrationChange]
+    changes: list[MigrationChange]
     first_seen: datetime
     last_modified: datetime
     change_count: int
@@ -31,8 +31,8 @@ class Statistics(BaseModel):
     total_migrations: int
     total_changes: int
     average_changes_per_migration: float
-    most_changed_migrations: List[HistoryRecord]
-    problematic_patterns: List[str]
+    most_changed_migrations: list[HistoryRecord]
+    problematic_patterns: list[str]
 
 
 class MigrationHistory:
@@ -64,7 +64,7 @@ class MigrationHistory:
         if analyzer is None:
             raise ValueError("analyzer cannot be None")
         self.analyzer = analyzer
-        self.records: Dict[str, HistoryRecord] = {}
+        self.records: dict[str, HistoryRecord] = {}
         # LRU cache for commits with size limit
         self._commit_cache: OrderedDict[str, Optional[Commit]] = OrderedDict()
         self._max_cache_size = max_cache_size
@@ -280,7 +280,7 @@ class MigrationHistory:
             problematic_patterns=problematic_patterns,
         )
 
-    def find_problematic_patterns(self) -> List[str]:
+    def find_problematic_patterns(self) -> list[str]:
         """Find problematic patterns in migration history.
 
         Detects the following problematic patterns:
@@ -318,7 +318,7 @@ class MigrationHistory:
 
     def generate_timeline(
         self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None
-    ) -> List[HistoryRecord]:
+    ) -> list[HistoryRecord]:
         """Generate timeline of migration changes.
 
         Filters history records by specified date range and sorts

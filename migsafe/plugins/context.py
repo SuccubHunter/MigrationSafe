@@ -1,6 +1,6 @@
 """Context for plugins."""
 
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from migsafe.rules.rule_engine import RuleEngine
@@ -26,7 +26,7 @@ class PluginContext:
         >>> rule_engine = context.get_rule_engine()
     """
 
-    def __init__(self, config: Dict, rule_engine: Optional["RuleEngine"] = None):
+    def __init__(self, config: dict, rule_engine: Optional["RuleEngine"] = None):
         """Initialize context.
 
         Args:
@@ -36,7 +36,7 @@ class PluginContext:
         self.config = config
         self.rule_engine = rule_engine
 
-    def get_config(self) -> Dict:
+    def get_config(self) -> dict:
         """Get configuration.
 
         Returns:

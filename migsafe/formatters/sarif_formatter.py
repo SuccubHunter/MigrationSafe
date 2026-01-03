@@ -3,7 +3,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from .. import __version__
 from ..base import AnalyzerResult
@@ -53,7 +53,7 @@ class SarifFormatter(Formatter):
         IssueType.SQL_CTE_IN_MIGRATION: "MIG026",
     }
 
-    def format(self, results: List[Tuple[Path, AnalyzerResult]]) -> str:
+    def format(self, results: list[tuple[Path, AnalyzerResult]]) -> str:
         """Format analysis results as SARIF."""
         try:
             # Data validation
@@ -75,10 +75,6 @@ class SarifFormatter(Formatter):
             return json.dumps(sarif, ensure_ascii=False, indent=2)
         except (TypeError, ValueError) as e:
             raise ValueError(f"Data validation error when formatting SARIF: {e}") from e
-        except (TypeError, ValueError) as e:
-            if isinstance(e, ValueError):
-                raise RuntimeError(f"Error encoding JSON for SARIF: {e}") from e
-            raise
         except Exception as e:
             raise RuntimeError(f"Error formatting SARIF: {e}") from e
 
@@ -92,7 +88,7 @@ class SarifFormatter(Formatter):
 
         return self.format([(file_path, result)])
 
-    def _create_run(self, results: List[Tuple[Path, AnalyzerResult]]) -> Dict[str, Any]:
+    def _create_run(self, results: list[tuple[Path, AnalyzerResult]]) -> dict[str, Any]:
         """Create run object for SARIF."""
         tool = {
             "driver": {
@@ -103,8 +99,8 @@ class SarifFormatter(Formatter):
             }
         }
 
-        artifacts: List[Dict[str, Any]] = []
-        results_list: List[Dict[str, Any]] = []
+        artifacts: list[dict[str, Any]] = []
+        results_list: list[dict[str, Any]] = []
 
         for file_path, result in results:
             # Add artifact (file)
@@ -125,7 +121,7 @@ class SarifFormatter(Formatter):
 
         return {"tool": tool, "artifacts": artifacts, "results": results_list}
 
-    def _create_rules(self) -> List[Dict[str, Any]]:
+    def _create_rules(self) -> list[dict[str, Any]]:
         """Create rules for all issue types."""
         rules = []
 
@@ -335,7 +331,7 @@ class SarifFormatter(Formatter):
             },
         }
 
-        for issue_type, rule_data in rule_mapping.items():
+        for _issue_type, rule_data in rule_mapping.items():
             rules.append(
                 {
                     "id": rule_data["id"],
@@ -349,7 +345,7 @@ class SarifFormatter(Formatter):
 
         return rules
 
-    def _create_result(self, issue: Issue, file_path: Path, artifact_index: int) -> Dict[str, Any]:
+    def _create_result(self, issue: Issue, file_path: Path, artifact_index: int) -> dict[str, Any]:
         """Create result object for issue."""
         # Data validation
         if not isinstance(issue, Issue):

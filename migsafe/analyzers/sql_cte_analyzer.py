@@ -2,7 +2,6 @@
 
 import re
 from re import Pattern
-from typing import Dict, List
 
 from ..models import Issue, IssueSeverity, IssueType
 from .base_sql_analyzer import BaseSqlAnalyzer
@@ -28,7 +27,7 @@ class SqlCteAnalyzer(BaseSqlAnalyzer):
         <IssueType.SQL_RECURSIVE_CTE: 'sql_recursive_cte'>
     """
 
-    def _compile_patterns(self) -> Dict[str, Pattern]:
+    def _compile_patterns(self) -> dict[str, Pattern]:
         """Compile regular expressions for pattern matching."""
         return {
             # Recursive CTE
@@ -39,7 +38,7 @@ class SqlCteAnalyzer(BaseSqlAnalyzer):
             "cte_in_update_delete": re.compile(r"\bWITH\s+.*?\b(?:UPDATE|DELETE)\s+", re.IGNORECASE | re.DOTALL),
         }
 
-    def _analyze_normalized(self, sql: str, operation_index: int) -> List[Issue]:
+    def _analyze_normalized(self, sql: str, operation_index: int) -> list[Issue]:
         """Analyze CTE in normalized SQL query.
 
         Args:
@@ -58,7 +57,7 @@ class SqlCteAnalyzer(BaseSqlAnalyzer):
 
         return issues
 
-    def _check_recursive_cte(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_recursive_cte(self, sql: str, operation_index: int) -> list[Issue]:
         """Check recursive CTEs."""
         issues = []
 
@@ -84,7 +83,7 @@ class SqlCteAnalyzer(BaseSqlAnalyzer):
 
         return issues
 
-    def _check_cte_in_migration(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_cte_in_migration(self, sql: str, operation_index: int) -> list[Issue]:
         """Check CTE in UPDATE/DELETE operations."""
         issues = []
 
@@ -136,7 +135,7 @@ class SqlCteAnalyzer(BaseSqlAnalyzer):
 
         return issues
 
-    def _check_large_cte(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_large_cte(self, sql: str, operation_index: int) -> list[Issue]:
         """Check large CTEs (multiple SELECTs in CTE).
 
         Note: Uses heuristic based on counting SELECTs in CTE.
@@ -156,24 +155,23 @@ class SqlCteAnalyzer(BaseSqlAnalyzer):
             select_count = len(re.findall(r"\bSELECT\s+", cte_part, re.IGNORECASE))
 
             # If more than 3 SELECTs, consider CTE large
-            if select_count > 3:
+            if select_count > 3 and not re.search(r"\bLIMIT\s+\d+", cte_part, re.IGNORECASE):
                 # Check if there is LIMIT
-                if not re.search(r"\bLIMIT\s+\d+", cte_part, re.IGNORECASE):
-                    issues.append(
-                        Issue(
-                            severity=IssueSeverity.WARNING,
-                            type=IssueType.SQL_LARGE_CTE,
-                            message=f"Large CTE with {select_count} SELECTs without LIMIT may be slow",
-                            operation_index=operation_index,
-                            recommendation=(
-                                "Large CTEs without LIMIT may be slow and consume a lot of memory.\n"
-                                "Recommendations:\n"
-                                "1) Use batching for large CTEs\n"
-                                "2) Consider using temporary tables\n"
-                                "3) Check performance on test data\n"
-                                "4) Add LIMIT to CTE if possible"
-                            ),
-                        )
+                issues.append(
+                    Issue(
+                        severity=IssueSeverity.WARNING,
+                        type=IssueType.SQL_LARGE_CTE,
+                        message=f"Large CTE with {select_count} SELECTs without LIMIT may be slow",
+                        operation_index=operation_index,
+                        recommendation=(
+                            "Large CTEs without LIMIT may be slow and consume a lot of memory.\n"
+                            "Recommendations:\n"
+                            "1) Use batching for large CTEs\n"
+                            "2) Consider using temporary tables\n"
+                            "3) Check performance on test data\n"
+                            "4) Add LIMIT to CTE if possible"
+                        ),
                     )
+                )
 
         return issues

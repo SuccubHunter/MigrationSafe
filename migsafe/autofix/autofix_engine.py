@@ -2,7 +2,7 @@
 
 import ast
 import logging
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from ..models import Issue
 from .add_column_not_null_fix import AddColumnNotNullFix
@@ -22,7 +22,7 @@ class AutofixEngine:
     - DropIndexFix: adds postgresql_concurrently=True
     """
 
-    def __init__(self, fixes: Optional[List[Autofix]] = None):
+    def __init__(self, fixes: Optional[list[Autofix]] = None):
         """
         Initializes the fixes engine.
 
@@ -43,7 +43,7 @@ class AutofixEngine:
         """Creates engine with default fixes."""
         return cls()
 
-    def get_applicable_fixes(self, issue: Issue) -> List[Autofix]:
+    def get_applicable_fixes(self, issue: Issue) -> list[Autofix]:
         """
         Returns list of fixes that can handle the specified issue.
 
@@ -55,7 +55,7 @@ class AutofixEngine:
         """
         return [fix for fix in self._fixes if fix.can_fix(issue)]
 
-    def apply_fixes(self, source_code: str, issues: List[Issue], dry_run: bool = False) -> Tuple[str, List[Issue], List[Issue]]:
+    def apply_fixes(self, source_code: str, issues: list[Issue], dry_run: bool = False) -> tuple[str, list[Issue], list[Issue]]:
         """
         Applies fixes to migration source code.
 
@@ -68,8 +68,8 @@ class AutofixEngine:
             Tuple (fixed_code, fixed_issues, unfixed_issues)
         """
         fixed_code = source_code
-        fixed_issues: List[Issue] = []
-        unfixed_issues: List[Issue] = []
+        fixed_issues: list[Issue] = []
+        unfixed_issues: list[Issue] = []
 
         # Parse AST once for all fixes
         try:
@@ -127,7 +127,7 @@ class AutofixEngine:
 
         return fixed_code, fixed_issues, unfixed_issues
 
-    def can_fix_any(self, issues: List[Issue]) -> bool:
+    def can_fix_any(self, issues: list[Issue]) -> bool:
         """
         Checks if the engine can fix at least one issue.
 
@@ -137,10 +137,7 @@ class AutofixEngine:
         Returns:
             True if at least one issue can be fixed
         """
-        for issue in issues:
-            if self.get_applicable_fixes(issue):
-                return True
-        return False
+        return any(self.get_applicable_fixes(issue) for issue in issues)
 
     def _validate_issue(self, issue: Issue, ast_tree: Optional[ast.AST] = None) -> bool:
         """
@@ -180,10 +177,13 @@ class AutofixEngine:
             if isinstance(node, ast.FunctionDef) and node.name == "upgrade":
                 # Count op.* calls in upgrade() function body
                 for stmt in node.body:
-                    if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Call):
-                        if isinstance(stmt.value.func, ast.Attribute):
-                            if isinstance(stmt.value.func.value, ast.Name):
-                                if stmt.value.func.value.id == "op":
-                                    count += 1
+                    if (
+                        isinstance(stmt, ast.Expr)
+                        and isinstance(stmt.value, ast.Call)
+                        and isinstance(stmt.value.func, ast.Attribute)
+                        and isinstance(stmt.value.func.value, ast.Name)
+                        and stmt.value.func.value.id == "op"
+                    ):
+                        count += 1
                 break
         return count

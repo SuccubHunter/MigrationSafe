@@ -2,7 +2,7 @@
 
 import ast
 import logging
-from typing import Optional, Tuple
+from typing import Optional
 
 from ..models import Issue, IssueType
 from .ast_utils import unparse_ast
@@ -19,7 +19,7 @@ class CreateIndexFix(Autofix):
         """Checks if can fix CREATE_INDEX_WITHOUT_CONCURRENTLY issue."""
         return issue.type == IssueType.CREATE_INDEX_WITHOUT_CONCURRENTLY
 
-    def apply_fix(self, source_code: str, issue: Issue, ast_tree: Optional[ast.Module] = None) -> Tuple[str, bool]:
+    def apply_fix(self, source_code: str, issue: Issue, ast_tree: Optional[ast.Module] = None) -> tuple[str, bool]:
         """
         Adds postgresql_concurrently=True to op.create_index call.
 
@@ -137,11 +137,10 @@ class CreateIndexFinder(BaseOperationFinder):
 
     def _is_target_operation(self, node: ast.Call) -> bool:
         """Checks if the call is a create_index operation."""
-        if isinstance(node.func, ast.Attribute):
-            if isinstance(node.func.value, ast.Name):
-                var_name = node.func.value.id
-                # Check op.create_index or any batch_op.create_index
-                return (var_name == "op" and node.func.attr == "create_index") or (
-                    var_name in self.batch_context and node.func.attr == "create_index"
-                )
+        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+            var_name = node.func.value.id
+            # Check op.create_index or any batch_op.create_index
+            return (var_name == "op" and node.func.attr == "create_index") or (
+                var_name in self.batch_context and node.func.attr == "create_index"
+            )
         return False

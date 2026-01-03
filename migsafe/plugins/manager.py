@@ -2,7 +2,7 @@
 
 import logging
 import time
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 from migsafe.rules.base import Rule
 
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 class PluginManager:
     """Management of migsafe plugins."""
 
-    def __init__(self, config: Optional[Union[Dict, PluginConfigDict]] = None):
+    def __init__(self, config: Optional[Union[dict, PluginConfigDict]] = None):
         """Initialize manager.
 
         Args:
@@ -144,7 +144,7 @@ class PluginManager:
 
         self.metrics.load_time_seconds = time.time() - start_time
 
-    def get_all_rules(self) -> List[Rule]:
+    def get_all_rules(self) -> list[Rule]:
         """Get all rules from all plugins.
 
         Returns:
@@ -187,7 +187,7 @@ class PluginManager:
         """
         return self.registry.get_plugin(name)
 
-    def list_plugins(self) -> List[Plugin]:
+    def list_plugins(self) -> list[Plugin]:
         """List all loaded plugins.
 
         Returns:

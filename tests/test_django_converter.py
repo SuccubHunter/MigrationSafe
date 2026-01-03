@@ -302,9 +302,8 @@ migrations.AddField(
     for node in tree.body:
         if isinstance(node, ast.Assign):
             for target in node.targets:
-                if isinstance(target, ast.Name):
-                    if isinstance(node.value, ast.Constant):
-                        context[target.id] = node.value.value
+                if isinstance(target, ast.Name) and isinstance(node.value, ast.Constant):
+                    context[target.id] = node.value.value
 
     # Extract AddField call
     call = None
@@ -346,10 +345,9 @@ migrations.CreateModel(name=f'{prefix}User', fields=[])
     tree = ast.parse(code)
     call = None
     for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-            if node.func.attr == "CreateModel":
-                call = node
-                break
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute) and node.func.attr == "CreateModel":
+            call = node
+            break
 
     if call:
         converter = DjangoOperationConverter()

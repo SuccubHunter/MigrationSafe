@@ -9,7 +9,7 @@ import sys
 import traceback
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple
+from typing import Any, NamedTuple, Optional
 
 # UTF-8 setup for Windows (for correct output)
 if sys.platform == "win32":
@@ -27,6 +27,8 @@ try:
     import click
 except ImportError:
     click = None  # type: ignore[assignment]
+
+import contextlib
 
 from . import __version__
 from .analyzers.alembic_analyzer import AlembicMigrationAnalyzer
@@ -124,7 +126,7 @@ def _load_and_apply_config(config_path: Optional[str], cli_params: dict) -> dict
         sys.exit(1)
 
 
-def find_migration_files(paths: List[Path]) -> List[Path]:
+def find_migration_files(paths: list[Path]) -> list[Path]:
     """
     Finds all migration files in the specified paths.
 
@@ -136,7 +138,7 @@ def find_migration_files(paths: List[Path]) -> List[Path]:
     Returns:
         List of paths to migration files
     """
-    migration_files: List[Path] = []
+    migration_files: list[Path] = []
 
     # If paths are not specified, check if the current directory is a Django project
     if not paths:
@@ -185,7 +187,7 @@ def find_migration_files(paths: List[Path]) -> List[Path]:
     return sorted(set(migration_files))  # Remove duplicates and sort
 
 
-def filter_django_migrations_by_app(migration_files: List[Path], app_name: str) -> List[Path]:
+def filter_django_migrations_by_app(migration_files: list[Path], app_name: str) -> list[Path]:
     """
     Filters Django migrations by application name.
 
@@ -223,7 +225,7 @@ def filter_django_migrations_by_app(migration_files: List[Path], app_name: str) 
     return filtered
 
 
-def should_exclude_file(file_path: Path, exclude_patterns: List[str]) -> bool:
+def should_exclude_file(file_path: Path, exclude_patterns: list[str]) -> bool:
     """
     Checks if a file should be excluded by patterns.
 
@@ -243,9 +245,8 @@ def should_exclude_file(file_path: Path, exclude_patterns: List[str]) -> bool:
         if pattern in file_str:
             return True
         # Support for simple wildcards
-        if "*" in pattern:
-            if fnmatch.fnmatch(file_str, pattern):
-                return True
+        if "*" in pattern and fnmatch.fnmatch(file_str, pattern):
+            return True
 
     return False
 
@@ -299,11 +300,11 @@ def handle_analysis_error(file_path: Path, error: Exception, verbose: bool = Fal
 
 
 def analyze_files(
-    files: List[Path],
-    exclude_patterns: Optional[List[str]] = None,
+    files: list[Path],
+    exclude_patterns: Optional[list[str]] = None,
     verbose: bool = False,
-    plugins_config: Optional[Dict[str, Any]] = None,
-) -> Tuple[List[Tuple[Path, AnalyzerResult]], int]:
+    plugins_config: Optional[dict[str, Any]] = None,
+) -> tuple[list[tuple[Path, AnalyzerResult]], int]:
     """
     Analyzes a list of migration files.
 
@@ -343,10 +344,7 @@ def analyze_files(
             from typing import Union
 
             analyzer: Union[AlembicMigrationAnalyzer, DjangoMigrationAnalyzer]
-            if migration_type == "django":
-                analyzer = django_analyzer
-            else:
-                analyzer = alembic_analyzer
+            analyzer = django_analyzer if migration_type == "django" else alembic_analyzer
 
             result = analyzer.analyze(source)
             results.append((file_path, result))
@@ -374,7 +372,7 @@ def get_formatter(
     Returns:
         Formatter instance
     """
-    formatter_classes: Dict[str, type] = {
+    formatter_classes: dict[str, type] = {
         FORMAT_TEXT: TextFormatter,
         FORMAT_JSON: JsonFormatter,
         FORMAT_HTML: HtmlFormatter,
@@ -389,7 +387,7 @@ def get_formatter(
     return formatter_class(min_severity=min_severity, no_color=no_color, verbose=verbose, quiet=quiet)  # type: ignore[no-any-return]
 
 
-def has_critical_issues(results: List[Tuple[Path, AnalyzerResult]]) -> bool:
+def has_critical_issues(results: list[tuple[Path, AnalyzerResult]]) -> bool:
     """
     Checks if there are critical issues in the results.
 
@@ -575,10 +573,9 @@ def apply_autofix_to_file(
         return AutofixResult(success=True, fixed_count=len(fixed_issues), unfixed_count=len(unfixed_issues))
 
     # Request confirmation
-    if not yes:
-        if not click.confirm(f"\n❓ Apply fixes to {file_path}?"):
-            click.echo(f"⏭️  Skipped: {file_path}", err=True)
-            return AutofixResult(success=True, fixed_count=0, unfixed_count=len(fixable_issues))
+    if not yes and not click.confirm(f"\n❓ Apply fixes to {file_path}?"):
+        click.echo(f"⏭️  Skipped: {file_path}", err=True)
+        return AutofixResult(success=True, fixed_count=0, unfixed_count=len(fixable_issues))
 
     # Create backup
     backup_path = None
@@ -588,9 +585,8 @@ def apply_autofix_to_file(
             click.echo(f"💾 Backup created: {backup_path}", err=True)
         else:
             click.echo(f"⚠️  Failed to create backup for {file_path}", err=True)
-            if not yes:
-                if not click.confirm("Continue without backup?"):
-                    return AutofixResult(success=False, fixed_count=0, unfixed_count=len(fixable_issues))
+            if not yes and not click.confirm("Continue without backup?"):
+                return AutofixResult(success=False, fixed_count=0, unfixed_count=len(fixable_issues))
 
     # Apply fixes
     try:
@@ -616,7 +612,7 @@ def _run_analysis(
     no_color: bool,
     config: Optional[str],
     exclude: tuple,
-    plugins_config: Optional[Dict[str, Any]] = None,
+    plugins_config: Optional[dict[str, Any]] = None,
     autofix: bool = False,
     apply: bool = False,
     yes: bool = False,
@@ -668,19 +664,15 @@ def _run_analysis(
         return 1
 
     # If paths are not specified, use the current directory
-    paths_list: List[Path]
-    if not paths:
-        paths_list = [Path.cwd()]
-    else:
-        paths_list = [Path(p) for p in paths]
+    paths_list: list[Path]
+    paths_list = [Path.cwd()] if not paths else [Path(p) for p in paths]
 
     # Automatic Django project detection
     # If specific paths are not specified and a Django project is detected, add migration directories
-    if len(paths_list) == 1 and paths_list[0] == Path.cwd():
-        if detect_django_project(paths_list[0]):
-            django_migration_dirs = find_django_migration_directories(paths_list[0])
-            if django_migration_dirs and verbose:
-                click.echo(f"🔍 Django project detected. Found {len(django_migration_dirs)} migration directories.", err=True)
+    if len(paths_list) == 1 and paths_list[0] == Path.cwd() and detect_django_project(paths_list[0]):
+        django_migration_dirs = find_django_migration_directories(paths_list[0])
+        if django_migration_dirs and verbose:
+            click.echo(f"🔍 Django project detected. Found {len(django_migration_dirs)} migration directories.", err=True)
 
     # Find migration files
     migration_files = find_migration_files(paths_list)
@@ -765,10 +757,8 @@ def _run_analysis(
         for file_path, result in results:
             # Save file modification time for change checking
             file_mtime = None
-            try:
+            with contextlib.suppress(OSError):
                 file_mtime = file_path.stat().st_mtime
-            except OSError:
-                pass
 
             autofix_result = apply_autofix_to_file(
                 file_path,
@@ -901,7 +891,7 @@ def analyze(
             sys.exit(1)
 
     # Add plugins_dir to plugin configuration
-    plugins_config: Optional[Dict[str, Any]] = None
+    plugins_config: Optional[dict[str, Any]] = None
     if plugins_dir or config:
         if config:
             try:
@@ -1043,10 +1033,7 @@ def stats(paths, output_format, output, migration, severity, rule, since, no_col
     no_color = updated_params.get("no_color", no_color)
 
     # If paths are not specified, use the current directory
-    if not paths:
-        paths = [Path.cwd()]
-    else:
-        paths = [Path(p) for p in paths]
+    paths = [Path.cwd()] if not paths else [Path(p) for p in paths]
 
     # Find migration files
     migration_files = find_migration_files(paths)
@@ -1149,9 +1136,9 @@ def _format_history_text(
     history: MigrationHistory,
     stats: Statistics,
     frequency: FrequencyStats,
-    patterns: List[Pattern],
-    hotspots: List[str],
-    recommendations: List[str],
+    patterns: list[Pattern],
+    hotspots: list[str],
+    recommendations: list[str],
     no_color: bool = False,
 ) -> str:
     """Formats migration history in text format."""
@@ -1227,9 +1214,9 @@ def _format_history_json(
     history: MigrationHistory,
     stats: Statistics,
     frequency: FrequencyStats,
-    patterns: List[Pattern],
-    hotspots: List[str],
-    recommendations: List[str],
+    patterns: list[Pattern],
+    hotspots: list[str],
+    recommendations: list[str],
 ) -> str:
     """Formats migration history in JSON format."""
     import json
@@ -1322,10 +1309,7 @@ def history(migration, output_format, since, until, author, output, no_color, re
         history_tracker = MigrationHistory(git_analyzer)
 
         # Find migration files
-        if migration:
-            migration_files = [migration]
-        else:
-            migration_files = git_analyzer.find_migration_files()
+        migration_files = [migration] if migration else git_analyzer.find_migration_files()
 
         if not migration_files:
             click.echo("❌ Migration files not found.", err=True)
@@ -1337,20 +1321,14 @@ def history(migration, output_format, since, until, author, output, no_color, re
         if since:
             try:
                 # Support YYYY-MM-DD and YYYY-MM-DDTHH:MM:SS formats
-                if len(since) == 10:  # YYYY-MM-DD
-                    since_date = datetime.strptime(since, "%Y-%m-%d")
-                else:
-                    since_date = datetime.fromisoformat(since)
+                since_date = datetime.strptime(since, "%Y-%m-%d") if len(since) == 10 else datetime.fromisoformat(since)
             except ValueError:
                 click.echo(f"❌ Invalid date format --since: {since}. Use format YYYY-MM-DD", err=True)
                 sys.exit(1)
         if until:
             try:
                 # Support YYYY-MM-DD and YYYY-MM-DDTHH:MM:SS formats
-                if len(until) == 10:  # YYYY-MM-DD
-                    until_date = datetime.strptime(until, "%Y-%m-%d")
-                else:
-                    until_date = datetime.fromisoformat(until)
+                until_date = datetime.strptime(until, "%Y-%m-%d") if len(until) == 10 else datetime.fromisoformat(until)
             except ValueError:
                 click.echo(f"❌ Invalid date format --until: {until}. Use format YYYY-MM-DD", err=True)
                 sys.exit(1)
@@ -1518,11 +1496,7 @@ def execute(
         )
 
         # Format result
-        if output_format == FORMAT_JSON:
-            output_text = result.model_dump_json(indent=2)
-        else:
-            # Text format
-            output_text = _format_execution_result_text(result)
+        output_text = result.model_dump_json(indent=2) if output_format == FORMAT_JSON else _format_execution_result_text(result)
 
         # Output or save result
         if output:

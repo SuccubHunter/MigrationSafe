@@ -1,7 +1,7 @@
 """Plugin registry."""
 
 import logging
-from typing import Dict, List, Optional
+from typing import Optional
 
 from .base import Plugin
 
@@ -13,7 +13,7 @@ class PluginRegistry:
 
     def __init__(self):
         """Initialize registry."""
-        self._plugins: Dict[str, Plugin] = {}
+        self._plugins: dict[str, Plugin] = {}
 
     def register(self, plugin: Plugin) -> None:
         """Register plugin.
@@ -59,7 +59,7 @@ class PluginRegistry:
         """
         return self._plugins.get(name)
 
-    def list_plugins(self) -> List[Plugin]:
+    def list_plugins(self) -> list[Plugin]:
         """List all registered plugins.
 
         Returns:

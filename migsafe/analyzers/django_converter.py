@@ -2,7 +2,7 @@
 
 import ast
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from ..ast_utils import (
     extract_keyword_arg,
@@ -20,7 +20,7 @@ class DjangoOperationConverter:
         """Initialize converter."""
         pass
 
-    def convert(self, django_operation: Any, context: Optional[Dict[str, Any]] = None) -> Optional[MigrationOp]:
+    def convert(self, django_operation: Any, context: Optional[dict[str, Any]] = None) -> Optional[MigrationOp]:
         """Convert Django operation to MigrationOp.
 
         Args:
@@ -44,7 +44,7 @@ class DjangoOperationConverter:
 
         return None
 
-    def _convert_from_ast_call(self, call: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def _convert_from_ast_call(self, call: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert AST call to MigrationOp.
 
         Args:
@@ -108,7 +108,7 @@ class DjangoOperationConverter:
             logger.warning(f"Error converting operation {op_name}: {type(e).__name__}: {e}. Context: {context}")
             return None
 
-    def convert_createmodel(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_createmodel(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert CreateModel to add_table.
 
         Args:
@@ -172,7 +172,7 @@ class DjangoOperationConverter:
         # import and execution for full analysis
         return MigrationOp(type="add_table", table=table)
 
-    def convert_addfield(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_addfield(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert AddField to add_column.
 
         Args:
@@ -243,7 +243,7 @@ class DjangoOperationConverter:
 
         return migration_op
 
-    def convert_alterfield(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_alterfield(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert AlterField to alter_column.
 
         Args:
@@ -287,7 +287,7 @@ class DjangoOperationConverter:
 
         return MigrationOp(type="alter_column", table=table, column=field_name, nullable=nullable, column_type=column_type)
 
-    def convert_deletefield(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_deletefield(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert DeleteField to drop_column.
 
         Args:
@@ -315,7 +315,7 @@ class DjangoOperationConverter:
 
         return MigrationOp(type="drop_column", table=table, column=field_name)
 
-    def convert_createindex(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_createindex(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert CreateIndex to create_index.
 
         Args:
@@ -345,39 +345,37 @@ class DjangoOperationConverter:
 
         # Try to extract index information
         for keyword in operation.keywords:
-            if keyword.arg == "index":
+            if keyword.arg == "index" and isinstance(keyword.value, ast.Call):
                 # index can be a call to Index(...)
-                if isinstance(keyword.value, ast.Call):
-                    # Try to extract index name
-                    index_name = extract_keyword_arg(keyword.value, "name", context)
-                    # Try to find concurrently (usually in fields or as separate parameter)
-                    concurrently = extract_keyword_arg(keyword.value, "concurrently", context)
+                # Try to extract index name
+                index_name = extract_keyword_arg(keyword.value, "name", context)
+                # Try to find concurrently (usually in fields or as separate parameter)
+                concurrently = extract_keyword_arg(keyword.value, "concurrently", context)
 
-                    # Try to extract fields (index fields)
-                    # Index(fields=['field1', 'field2'], ...)
-                    fields_node = None
-                    for kw in keyword.value.keywords:
-                        if kw.arg == "fields":
-                            fields_node = kw.value
-                            break
+                # Try to extract fields (index fields)
+                # Index(fields=['field1', 'field2'], ...)
+                fields_node = None
+                for kw in keyword.value.keywords:
+                    if kw.arg == "fields":
+                        fields_node = kw.value
+                        break
 
-                    # Also try positional argument (first argument is usually fields)
-                    if fields_node is None and len(keyword.value.args) > 0:
-                        fields_node = keyword.value.args[0]
+                # Also try positional argument (first argument is usually fields)
+                if fields_node is None and len(keyword.value.args) > 0:
+                    fields_node = keyword.value.args[0]
 
-                    # Extract fields from list or tuple
-                    if fields_node:
-                        if isinstance(fields_node, (ast.List, ast.Tuple)):
-                            fields_list = []
-                            for elt in fields_node.elts:
-                                # Try to extract as string
-                                from ..ast_utils import safe_eval_string
+                # Extract fields from list or tuple
+                if fields_node and isinstance(fields_node, (ast.List, ast.Tuple)):
+                    fields_list = []
+                    for elt in fields_node.elts:
+                        # Try to extract as string
+                        from ..ast_utils import safe_eval_string
 
-                                field_name = safe_eval_string(elt, context)
-                                if field_name:
-                                    fields_list.append(field_name)
-                            if fields_list:
-                                index_fields = ", ".join(fields_list)
+                        field_name = safe_eval_string(elt, context)
+                        if field_name:
+                            fields_list.append(field_name)
+                    if fields_list:
+                        index_fields = ", ".join(fields_list)
 
         # In Django, CreateIndex is not concurrent by default (need to use separate operation)
         # But we can check if there's an explicit indication
@@ -394,7 +392,7 @@ class DjangoOperationConverter:
 
         return migration_op
 
-    def convert_runsql(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_runsql(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert RunSQL to execute_sql.
 
         Args:
@@ -413,7 +411,7 @@ class DjangoOperationConverter:
 
         return MigrationOp(type="execute", raw_sql=sql)
 
-    def convert_runpython(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_runpython(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Handle RunPython operations.
 
         Args:
@@ -426,7 +424,7 @@ class DjangoOperationConverter:
         # Create execute operation to generate warning
         return MigrationOp(type="execute", raw_sql="<runpython>")
 
-    def convert_deletemodel(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_deletemodel(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert DeleteModel to drop_table.
 
         Args:
@@ -452,7 +450,7 @@ class DjangoOperationConverter:
 
         return MigrationOp(type="drop_table", table=table)
 
-    def convert_renamemodel(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_renamemodel(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert RenameModel to rename_table.
 
         Args:
@@ -482,7 +480,7 @@ class DjangoOperationConverter:
             table=table,
         )
 
-    def convert_renamefield(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_renamefield(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert RenameField to rename_column.
 
         Args:
@@ -516,7 +514,7 @@ class DjangoOperationConverter:
             column=old_name,
         )
 
-    def convert_altermodeltable(self, operation: ast.Call, context: Dict[str, Any]) -> Optional[MigrationOp]:
+    def convert_altermodeltable(self, operation: ast.Call, context: dict[str, Any]) -> Optional[MigrationOp]:
         """Convert AlterModelTable to table name change.
 
         Args:

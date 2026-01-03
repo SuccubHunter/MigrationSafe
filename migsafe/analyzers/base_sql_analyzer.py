@@ -6,7 +6,6 @@ providing common functionality for validation, normalization and analysis.
 
 from abc import ABC, abstractmethod
 from re import Pattern
-from typing import Dict, List
 
 from ..models import Issue
 from .sql_utils import normalize_sql, validate_sql_input
@@ -37,7 +36,7 @@ class BaseSqlAnalyzer(ABC):
         self._patterns = self._compile_patterns()
 
     @abstractmethod
-    def _compile_patterns(self) -> Dict[str, Pattern]:
+    def _compile_patterns(self) -> dict[str, Pattern]:
         """Compile regular expressions for pattern matching.
 
         Returns:
@@ -45,7 +44,7 @@ class BaseSqlAnalyzer(ABC):
         """
         pass
 
-    def analyze(self, sql: str, operation_index: int) -> List[Issue]:
+    def analyze(self, sql: str, operation_index: int) -> list[Issue]:
         """Analyze SQL query and return list of found issues.
 
         This method performs common operations:
@@ -77,7 +76,7 @@ class BaseSqlAnalyzer(ABC):
         return self._analyze_normalized(normalized_sql, operation_index)
 
     @abstractmethod
-    def _analyze_normalized(self, sql: str, operation_index: int) -> List[Issue]:
+    def _analyze_normalized(self, sql: str, operation_index: int) -> list[Issue]:
         """Analyze normalized SQL query.
 
         This method must be implemented in subclasses to perform

@@ -1,7 +1,5 @@
 """Rule for checking ALTER COLUMN TYPE."""
 
-from typing import List
-
 from ..models import Issue, IssueSeverity, IssueType, MigrationOp
 from .base import Rule
 
@@ -16,7 +14,7 @@ class AlterColumnTypeRule(Rule):
 
     name = "alter_column_type"
 
-    def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+    def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
         """Checks alter_column operation for column type changes.
 
         Args:
@@ -28,7 +26,7 @@ class AlterColumnTypeRule(Rule):
             List of found issues (Issue). Returns empty list,
             if operation is safe or not related to alter_column with type change.
         """
-        issues: List[Issue] = []
+        issues: list[Issue] = []
 
         # Check only alter_column operations
         if operation.type != "alter_column":

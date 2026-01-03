@@ -2,7 +2,7 @@
 
 import ast
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 try:
     from typing_extensions import TypeGuard
@@ -98,7 +98,7 @@ class DjangoMigrationAnalyzer(MigrationAnalyzer):
         operations = self._extract_operations(migration_info)
 
         # Convert Django operations to MigrationOp with context
-        migration_ops: List[MigrationOp] = []
+        migration_ops: list[MigrationOp] = []
         conversion_errors = []
 
         for idx, op in enumerate(operations):
@@ -163,7 +163,7 @@ class DjangoMigrationAnalyzer(MigrationAnalyzer):
 
     def _parse_migration(
         self, content: str
-    ) -> Dict[str, Optional[Union[ast.ClassDef, ast.List, ast.Tuple, ast.Name, ast.Module, Any]]]:
+    ) -> dict[str, Optional[Union[ast.ClassDef, ast.List, ast.Tuple, ast.Name, ast.Module, Any]]]:
         """Parse Django migration via AST.
 
         Args:
@@ -202,11 +202,10 @@ class DjangoMigrationAnalyzer(MigrationAnalyzer):
                         if base.attr == "Migration":
                             migration_class = node
                             break
-                    elif isinstance(base, ast.Name):
+                    elif isinstance(base, ast.Name) and base.id == "Migration":
                         # Migration (if imported directly)
-                        if base.id == "Migration":
-                            migration_class = node
-                            break
+                        migration_class = node
+                        break
 
                 if migration_class:
                     break
@@ -229,7 +228,7 @@ class DjangoMigrationAnalyzer(MigrationAnalyzer):
             "tree": tree,
         }
 
-    def _extract_context(self, migration_class: Optional[ast.ClassDef]) -> Dict[str, Union[str, bool]]:
+    def _extract_context(self, migration_class: Optional[ast.ClassDef]) -> dict[str, Union[str, bool]]:
         """Extract variable context from migration class.
 
         Args:
@@ -238,7 +237,7 @@ class DjangoMigrationAnalyzer(MigrationAnalyzer):
         Returns:
             Dictionary with variables and their values (strings or boolean values)
         """
-        context: Dict[str, Any] = {}
+        context: dict[str, Any] = {}
 
         if migration_class is None:
             return context
@@ -261,8 +260,8 @@ class DjangoMigrationAnalyzer(MigrationAnalyzer):
         return context
 
     def _extract_operations(
-        self, migration_ast: Dict[str, Optional[Union[ast.ClassDef, ast.List, ast.Tuple, ast.Name, ast.Module]]]
-    ) -> List[Union[ast.Call, ast.Name, Any]]:
+        self, migration_ast: dict[str, Optional[Union[ast.ClassDef, ast.List, ast.Tuple, ast.Name, ast.Module]]]
+    ) -> list[Union[ast.Call, ast.Name, Any]]:
         """Extract operations from migration AST.
 
         Args:
@@ -271,7 +270,7 @@ class DjangoMigrationAnalyzer(MigrationAnalyzer):
         Returns:
             List of Django operations (AST nodes, usually ast.Call or ast.Name)
         """
-        operations: List[Union[ast.Call, ast.Name, Any]] = []
+        operations: list[Union[ast.Call, ast.Name, Any]] = []
         operations_node = migration_ast.get("operations")
 
         if operations_node is None:

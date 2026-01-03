@@ -2,7 +2,7 @@
 
 import ast
 import logging
-from typing import Optional, Tuple
+from typing import Optional
 
 from ..models import Issue, IssueType
 from .ast_utils import unparse_ast
@@ -25,7 +25,7 @@ class AddColumnNotNullFix(Autofix):
         """Checks if can fix ADD_COLUMN_NOT_NULL issue."""
         return issue.type == IssueType.ADD_COLUMN_NOT_NULL
 
-    def apply_fix(self, source_code: str, issue: Issue, ast_tree: Optional[ast.Module] = None) -> Tuple[str, bool]:
+    def apply_fix(self, source_code: str, issue: Issue, ast_tree: Optional[ast.Module] = None) -> tuple[str, bool]:
         """
         Generates safe pattern for ADD COLUMN NOT NULL.
 
@@ -228,11 +228,10 @@ class AddColumnFinder(BaseOperationFinder):
 
     def _is_target_operation(self, node: ast.Call) -> bool:
         """Checks if the call is an add_column operation."""
-        if isinstance(node.func, ast.Attribute):
-            if isinstance(node.func.value, ast.Name):
-                var_name = node.func.value.id
-                # Check op.add_column or any batch_op.add_column
-                return (var_name == "op" and node.func.attr == "add_column") or (
-                    var_name in self.batch_context and node.func.attr == "add_column"
-                )
+        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+            var_name = node.func.value.id
+            # Check op.add_column or any batch_op.add_column
+            return (var_name == "op" and node.func.attr == "add_column") or (
+                var_name in self.batch_context and node.func.attr == "add_column"
+            )
         return False

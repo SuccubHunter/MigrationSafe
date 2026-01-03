@@ -1,7 +1,6 @@
 """Base class for plugins."""
 
 from abc import ABC, abstractmethod
-from typing import List
 
 from migsafe.rules.base import Rule
 
@@ -50,7 +49,7 @@ class Plugin(ABC):
         return ""
 
     @abstractmethod
-    def get_rules(self) -> List[Rule]:
+    def get_rules(self) -> list[Rule]:
         """Get rules from plugin.
 
         Returns:
@@ -58,7 +57,7 @@ class Plugin(ABC):
         """
         pass
 
-    def initialize(self, context: PluginContext) -> None:
+    def initialize(self, context: PluginContext) -> None:  # noqa: B027
         """Initialize plugin.
 
         Args:

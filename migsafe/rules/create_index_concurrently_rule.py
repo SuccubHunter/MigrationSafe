@@ -1,7 +1,5 @@
 """Rule for checking CREATE INDEX without CONCURRENTLY."""
 
-from typing import List
-
 from ..models import Issue, IssueSeverity, IssueType, MigrationOp
 from .base import Rule
 
@@ -20,8 +18,8 @@ class CreateIndexConcurrentlyRule(Rule):
         self,
         operation: MigrationOp,
         index: int,
-        operations: List[MigrationOp],  # Reserved for future use
-    ) -> List[Issue]:
+        operations: list[MigrationOp],  # Reserved for future use
+    ) -> list[Issue]:
         """Checks create_index operation for CONCURRENTLY flag.
 
         Args:
@@ -33,7 +31,7 @@ class CreateIndexConcurrentlyRule(Rule):
             List of found issues (Issue). Returns empty list,
             if operation is safe or not related to create_index.
         """
-        issues: List[Issue] = []
+        issues: list[Issue] = []
 
         # Check only create_index operations
         if operation.type != "create_index":

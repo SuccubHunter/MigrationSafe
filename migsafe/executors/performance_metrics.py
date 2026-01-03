@@ -1,7 +1,7 @@
 """Class for collecting performance metrics."""
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -34,8 +34,8 @@ class Metrics(BaseModel):
     """Migration performance metrics."""
 
     execution_time: float
-    tables: Dict[str, TableMetrics]
-    indexes: Dict[str, IndexMetrics]
+    tables: dict[str, TableMetrics]
+    indexes: dict[str, IndexMetrics]
     total_db_size_before: int
     total_db_size_after: int
     total_db_size_delta: int
@@ -46,9 +46,9 @@ class PerformanceMetrics:
 
     def __init__(self):
         """Initialize collector."""
-        self.before_metrics: Optional[Dict] = None
+        self.before_metrics: Optional[dict] = None
 
-    def collect_before(self, connection) -> Dict:
+    def collect_before(self, connection) -> dict:
         """Collect metrics before migration execution.
 
         Args:
@@ -57,7 +57,7 @@ class PerformanceMetrics:
         Returns:
             Dictionary with "before" metrics
         """
-        metrics: Dict[str, Any] = {"tables": {}, "indexes": {}, "total_db_size": 0}
+        metrics: dict[str, Any] = {"tables": {}, "indexes": {}, "total_db_size": 0}
 
         try:
             # Get database size
@@ -123,7 +123,7 @@ class PerformanceMetrics:
         self.before_metrics = metrics
         return metrics
 
-    def collect_after(self, connection, before_metrics: Dict) -> Metrics:
+    def collect_after(self, connection, before_metrics: dict) -> Metrics:
         """Collect metrics after migration execution.
 
         Args:
@@ -136,7 +136,7 @@ class PerformanceMetrics:
         after_metrics = self.collect_before(connection)
 
         # Calculate changes for tables
-        table_results: Dict[str, TableMetrics] = {}
+        table_results: dict[str, TableMetrics] = {}
         for table_name, before_data in before_metrics.get("tables", {}).items():
             after_data = after_metrics.get("tables", {}).get(table_name, {"size": 0, "row_count": None})
 
@@ -156,7 +156,7 @@ class PerformanceMetrics:
             )
 
         # Calculate changes for indexes
-        index_results: Dict[str, IndexMetrics] = {}
+        index_results: dict[str, IndexMetrics] = {}
         for index_name, before_data in before_metrics.get("indexes", {}).items():
             after_data = after_metrics.get("indexes", {}).get(index_name, {"size": 0, "table": before_data.get("table", "")})
 

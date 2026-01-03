@@ -1,7 +1,5 @@
 """Tests for the base Rule class."""
 
-from typing import List
-
 import pytest
 
 from migsafe.models import Issue, MigrationOp
@@ -20,7 +18,7 @@ def test_rule_has_check_method():
     class TestRule(Rule):
         name = "test_rule"
 
-        def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+        def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
             return []
 
     rule = TestRule()
@@ -33,7 +31,7 @@ def test_rule_has_name():
     class TestRule(Rule):
         name = "test_rule"
 
-        def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+        def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
             return []
 
     rule = TestRule()
@@ -46,7 +44,7 @@ def test_rule_check_returns_list():
     class TestRule(Rule):
         name = "test_rule"
 
-        def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+        def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
             return []
 
     rule = TestRule()
@@ -61,7 +59,7 @@ def test_rule_check_receives_operation():
     class TestRule(Rule):
         name = "test_rule"
 
-        def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+        def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
             assert operation.type == "add_column"
             assert operation.table == "users"
             return []
@@ -77,7 +75,7 @@ def test_rule_check_receives_index():
     class TestRule(Rule):
         name = "test_rule"
 
-        def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+        def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
             assert index == 2
             return []
 
@@ -96,7 +94,7 @@ def test_rule_check_receives_all_operations():
     class TestRule(Rule):
         name = "test_rule"
 
-        def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+        def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
             assert len(operations) == 3
             return []
 

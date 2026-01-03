@@ -17,9 +17,9 @@ if sys.platform == "win32":
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from migsafe.analyzers.alembic_analyzer import AlembicMigrationAnalyzer
-from migsafe.models import IssueSeverity
-from migsafe.sources.alembic_source import AlembicMigrationSource
+from migsafe.analyzers.alembic_analyzer import AlembicMigrationAnalyzer  # noqa: E402
+from migsafe.models import IssueSeverity  # noqa: E402
+from migsafe.sources.alembic_source import AlembicMigrationSource  # noqa: E402
 
 
 def print_separator():

@@ -2,7 +2,7 @@
 
 import csv
 from io import StringIO
-from typing import Any, Dict, List
+from typing import Any
 
 from ..stats import MigrationStats
 from .base import StatsFormatter
@@ -11,7 +11,7 @@ from .base import StatsFormatter
 class StatsCsvFormatter(StatsFormatter):
     """CSV formatter for statistics."""
 
-    def format(self, stats: MigrationStats, recommendations: List[Dict[str, Any]]) -> str:
+    def format(self, stats: MigrationStats, recommendations: list[dict[str, Any]]) -> str:
         """
         Format statistics as CSV.
 

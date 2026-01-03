@@ -2,7 +2,6 @@
 
 import re
 from re import Pattern
-from typing import Dict, List
 
 from ..models import Issue, IssueSeverity, IssueType
 from .base_sql_analyzer import BaseSqlAnalyzer
@@ -25,7 +24,7 @@ class SqlSubqueryAnalyzer(BaseSqlAnalyzer):
         <IssueType.SQL_CORRELATED_SUBQUERY: 'sql_correlated_subquery'>
     """
 
-    def _compile_patterns(self) -> Dict[str, Pattern]:
+    def _compile_patterns(self) -> dict[str, Pattern]:
         """Compile regular expressions for pattern matching."""
         # Use common patterns from sql_patterns
         patterns = get_sql_subquery_patterns()
@@ -34,7 +33,7 @@ class SqlSubqueryAnalyzer(BaseSqlAnalyzer):
         patterns.update(helper_patterns)
         return patterns
 
-    def _analyze_normalized(self, sql: str, operation_index: int) -> List[Issue]:
+    def _analyze_normalized(self, sql: str, operation_index: int) -> list[Issue]:
         """Analyze subqueries in normalized SQL query.
 
         Args:
@@ -54,7 +53,7 @@ class SqlSubqueryAnalyzer(BaseSqlAnalyzer):
 
         return issues
 
-    def _check_correlated_subqueries(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_correlated_subqueries(self, sql: str, operation_index: int) -> list[Issue]:
         """Check correlated subqueries.
 
         Note: Uses simplified approach based on regular expressions.
@@ -111,10 +110,9 @@ class SqlSubqueryAnalyzer(BaseSqlAnalyzer):
                         where_part = where_match.group(1)
                         # Check if there's a reference to outer table or alias
                         is_correlated = False
-                        if alias:
+                        if alias and re.search(rf"\b{alias}\.\w+", where_part, re.IGNORECASE):
                             # Search for alias reference (e.g., u.id)
-                            if re.search(rf"\b{alias}\.\w+", where_part, re.IGNORECASE):
-                                is_correlated = True
+                            is_correlated = True
                         # Search for table name reference (e.g., users.id)
                         if re.search(rf"\b{table}\.\w+", where_part, re.IGNORECASE):
                             is_correlated = True
@@ -151,7 +149,7 @@ class SqlSubqueryAnalyzer(BaseSqlAnalyzer):
 
         return issues
 
-    def _check_subquery_in_update(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_subquery_in_update(self, sql: str, operation_index: int) -> list[Issue]:
         """Check subqueries in UPDATE."""
         issues = []
 
@@ -202,7 +200,7 @@ class SqlSubqueryAnalyzer(BaseSqlAnalyzer):
 
         return issues
 
-    def _check_subquery_in_delete(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_subquery_in_delete(self, sql: str, operation_index: int) -> list[Issue]:
         """Check subqueries in DELETE."""
         issues = []
 
@@ -252,7 +250,7 @@ class SqlSubqueryAnalyzer(BaseSqlAnalyzer):
 
         return issues
 
-    def _check_subquery_without_limit(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_subquery_without_limit(self, sql: str, operation_index: int) -> list[Issue]:
         """Check subqueries without LIMIT in migrations."""
         issues = []
 

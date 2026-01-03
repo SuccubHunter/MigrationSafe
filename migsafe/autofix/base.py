@@ -2,7 +2,7 @@
 
 import ast
 from abc import ABC, abstractmethod
-from typing import Optional, Tuple
+from typing import Optional
 
 from ..models import Issue
 
@@ -28,7 +28,7 @@ class Autofix(ABC):
         pass
 
     @abstractmethod
-    def apply_fix(self, source_code: str, issue: Issue, ast_tree: Optional[ast.Module] = None) -> Tuple[str, bool]:
+    def apply_fix(self, source_code: str, issue: Issue, ast_tree: Optional[ast.Module] = None) -> tuple[str, bool]:
         """
         Applies the fix to the migration source code.
 
@@ -52,9 +52,7 @@ class Autofix(ABC):
         Returns:
             True if the issue is valid
         """
-        if issue.operation_index < 0:
-            return False
-        return True
+        return not issue.operation_index < 0
 
     def _validate_ast_tree(self, ast_tree: Optional[ast.Module]) -> bool:
         """
@@ -81,7 +79,4 @@ class Autofix(ABC):
         Returns:
             True if upgrade() function is found
         """
-        for node in ast.walk(ast_tree):
-            if isinstance(node, ast.FunctionDef) and node.name == "upgrade":
-                return True
-        return False
+        return any(isinstance(node, ast.FunctionDef) and node.name == "upgrade" for node in ast.walk(ast_tree))

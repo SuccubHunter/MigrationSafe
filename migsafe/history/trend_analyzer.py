@@ -4,7 +4,6 @@ import logging
 import re
 from collections import defaultdict
 from datetime import timedelta
-from typing import Dict, List
 
 from pydantic import BaseModel
 
@@ -30,7 +29,7 @@ class FrequencyStats(BaseModel):
 
     migrations_per_week: float
     migrations_per_month: float
-    peak_periods: List[str]
+    peak_periods: list[str]
 
 
 class Pattern(BaseModel):
@@ -39,7 +38,7 @@ class Pattern(BaseModel):
     pattern_type: str
     description: str
     frequency: int
-    affected_tables: List[str]
+    affected_tables: list[str]
 
 
 class MigrationTrendAnalyzer:
@@ -135,7 +134,7 @@ class MigrationTrendAnalyzer:
         migrations_per_month = len(all_dates) / months
 
         # Find peak periods (weeks with most migrations)
-        weekly_counts: Dict[str, int] = defaultdict(int)
+        weekly_counts: dict[str, int] = defaultdict(int)
         for date in all_dates:
             week_start = date - timedelta(days=date.weekday())
             week_key = week_start.strftime("%Y-%m-%d")
@@ -150,7 +149,7 @@ class MigrationTrendAnalyzer:
             migrations_per_week=migrations_per_week, migrations_per_month=migrations_per_month, peak_periods=peak_periods_str
         )
 
-    def detect_patterns(self, history: MigrationHistory) -> List[Pattern]:
+    def detect_patterns(self, history: MigrationHistory) -> list[Pattern]:
         """Detect patterns in migration history.
 
         Analyzes migration history and detects various patterns:
@@ -181,7 +180,7 @@ class MigrationTrendAnalyzer:
         patterns = []
 
         # Analyze frequently changed tables
-        table_changes: Dict[str, int] = defaultdict(int)
+        table_changes: dict[str, int] = defaultdict(int)
         table_files = defaultdict(set)  # Renamed for clarity
 
         if not history.records:
@@ -233,7 +232,7 @@ class MigrationTrendAnalyzer:
 
         return patterns
 
-    def identify_hotspots(self, history: MigrationHistory) -> List[str]:
+    def identify_hotspots(self, history: MigrationHistory) -> list[str]:
         """Identify "hotspots" - frequently changed tables.
 
         Analyzes migration history and finds tables that were changed
@@ -264,7 +263,7 @@ class MigrationTrendAnalyzer:
             logger.debug("Migration history is empty, no hotspots found")
             return []
 
-        table_counts: Dict[str, int] = defaultdict(int)
+        table_counts: dict[str, int] = defaultdict(int)
 
         for record in history.records.values():
             for change in record.changes:
@@ -298,7 +297,7 @@ class MigrationTrendAnalyzer:
 
         return [table_name for table_name, count in hotspots if count > self.MIN_HOTSPOT_CHANGES]
 
-    def generate_recommendations(self, history: MigrationHistory) -> List[str]:
+    def generate_recommendations(self, history: MigrationHistory) -> list[str]:
         """Generate recommendations based on trends.
 
         Args:

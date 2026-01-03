@@ -5,7 +5,7 @@ import logging
 from collections import OrderedDict
 from datetime import datetime
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Optional
 
 if TYPE_CHECKING:
     from git import InvalidGitRepositoryError, Repo
@@ -114,7 +114,7 @@ class CommitInfo(BaseModel):
     author: str
     date: str
     message: str
-    files: List[str]
+    files: list[str]
 
 
 class MigrationChange(BaseModel):
@@ -169,7 +169,7 @@ class GitHistoryAnalyzer:
         # LRU cache for migration pattern checks
         self._migration_pattern_cache: OrderedDict[str, bool] = OrderedDict()
         # LRU cache for diff
-        self._diff_cache: OrderedDict[Tuple[str, str], str] = OrderedDict()  # (commit_hash, file_path) -> diff
+        self._diff_cache: OrderedDict[tuple[str, str], str] = OrderedDict()  # (commit_hash, file_path) -> diff
         if not GIT_AVAILABLE:
             raise ValueError("GitPython is not installed. Install it: pip install GitPython")
 
@@ -189,7 +189,7 @@ class GitHistoryAnalyzer:
         try:
             self.repo = Repo(str(self.repo_path))
         except InvalidGitRepositoryError as e:
-            raise InvalidGitRepositoryError(f"Failed to open Git repository: {e}")
+            raise InvalidGitRepositoryError(f"Failed to open Git repository: {e}") from e
 
     def _is_migration_file(self, file_path: str) -> bool:
         """Checks if file is a migration (with caching).
@@ -241,7 +241,7 @@ class GitHistoryAnalyzer:
             self._commit_cache[commit_hash] = None
             return None
 
-    def find_migration_files(self, patterns: Optional[List[str]] = None) -> List[str]:
+    def find_migration_files(self, patterns: Optional[list[str]] = None) -> list[str]:
         """Find migration files in Git repository.
 
         Searches for migration files by specified patterns (glob patterns) among all
@@ -295,7 +295,7 @@ class GitHistoryAnalyzer:
         until: Optional[datetime] = None,
         author: Optional[str] = None,
         max_commits: Optional[int] = None,
-    ) -> List[CommitInfo]:
+    ) -> list[CommitInfo]:
         """Get file change history.
 
         Args:
@@ -398,7 +398,7 @@ class GitHistoryAnalyzer:
 
         return commits
 
-    def analyze_commits(self, commits: List[str]) -> List[MigrationChange]:
+    def analyze_commits(self, commits: list[str]) -> list[MigrationChange]:
         """Analyze commits to detect changes in migrations.
 
         Analyzes specified commits and extracts information about changes

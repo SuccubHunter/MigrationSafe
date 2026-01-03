@@ -9,7 +9,7 @@ from contextlib import closing
 from datetime import datetime
 from pathlib import Path
 from subprocess import CalledProcessError
-from typing import Dict, Optional
+from typing import Optional
 from urllib.parse import parse_qs, quote, urlparse
 
 from pydantic import BaseModel
@@ -113,7 +113,7 @@ class SnapshotExecutor:
         random_suffix = random.randint(1000, 9999)
         return f"snapshot_{formatted}_{random_suffix}"
 
-    def _get_connection_params(self) -> Dict[str, str]:
+    def _get_connection_params(self) -> dict[str, str]:
         """Get connection parameters for psycopg2.
 
         Returns:
@@ -127,13 +127,13 @@ class SnapshotExecutor:
             "password": self.db_password,
         }
 
-    def _get_pg_dump_env(self) -> Dict[str, str]:
+    def _get_pg_dump_env(self) -> dict[str, str]:
         """Get environment variables for pg_dump.
 
         Returns:
             Dictionary with environment variables
         """
-        env: Dict[str, str] = {}
+        env: dict[str, str] = {}
         if self.db_password:
             env["PGPASSWORD"] = self.db_password
         return env

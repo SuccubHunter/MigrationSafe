@@ -1,7 +1,6 @@
 """Text formatter for analysis results output."""
 
 from pathlib import Path
-from typing import List, Tuple
 
 from ..base import AnalyzerResult
 from ..models import IssueSeverity
@@ -31,7 +30,7 @@ class TextFormatter(Formatter):
             return text
         return f"{color}{text}{self.COLOR_RESET}"
 
-    def format(self, results: List[Tuple[Path, AnalyzerResult]]) -> str:
+    def format(self, results: list[tuple[Path, AnalyzerResult]]) -> str:
         """Format analysis results for multiple files."""
         output_lines = []
 
@@ -115,7 +114,7 @@ class TextFormatter(Formatter):
 
         return "\n".join(lines)
 
-    def _format_issue(self, issue, index: int) -> List[str]:
+    def _format_issue(self, issue, index: int) -> list[str]:
         """Format a single issue."""
         lines = []
 

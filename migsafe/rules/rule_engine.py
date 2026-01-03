@@ -1,6 +1,6 @@
 """Engine for applying migration analysis rules."""
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from ..models import Issue, MigrationOp
 from .base import Rule
@@ -23,7 +23,7 @@ class RuleEngine:
         1
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None, strict_plugins: bool = False) -> None:
+    def __init__(self, config: Optional[dict[str, Any]] = None, strict_plugins: bool = False) -> None:
         """Initializes the rules engine.
 
         Args:
@@ -39,7 +39,7 @@ class RuleEngine:
             >>> config = {"plugins": {"directories": ["my_plugins"]}}
             >>> engine = RuleEngine(config, strict_plugins=False)
         """
-        self._rules: List[Rule] = []
+        self._rules: list[Rule] = []
         self._plugin_manager: Optional[PluginManager] = None
         self._strict_plugins: bool = strict_plugins
 
@@ -47,7 +47,7 @@ class RuleEngine:
         if config:
             self._load_plugins(config)
 
-    def _load_plugins(self, config: Dict[str, Any]) -> None:
+    def _load_plugins(self, config: dict[str, Any]) -> None:
         """Loads plugins from configuration.
 
         Args:
@@ -68,7 +68,7 @@ class RuleEngine:
             plugin_manager.load_all_plugins(plugin_context)
 
             # Add rules from plugins
-            plugin_rules: List[Rule] = plugin_manager.get_all_rules()
+            plugin_rules: list[Rule] = plugin_manager.get_all_rules()
             for rule in plugin_rules:
                 self.add_rule(rule)
 
@@ -82,7 +82,7 @@ class RuleEngine:
                 # Log error but do not interrupt execution
                 logger.warning(error_msg, exc_info=True)
 
-    def get_rules(self) -> List[Rule]:
+    def get_rules(self) -> list[Rule]:
         """
         Returns list of all registered rules.
 
@@ -108,7 +108,7 @@ class RuleEngine:
             raise TypeError(f"Rule must be an instance of Rule, got {type(rule)}")
         self._rules.append(rule)
 
-    def check_all(self, operations: List[MigrationOp]) -> List[Issue]:
+    def check_all(self, operations: list[MigrationOp]) -> list[Issue]:
         """
         Applies all rules to all migration operations.
 
@@ -134,7 +134,7 @@ class RuleEngine:
         return all_issues
 
     @classmethod
-    def with_default_rules(cls, config: Optional[Dict] = None) -> "RuleEngine":
+    def with_default_rules(cls, config: Optional[dict] = None) -> "RuleEngine":
         """
         Creates engine with default rules.
 

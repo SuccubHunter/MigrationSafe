@@ -1,7 +1,5 @@
 """Rule for analyzing SQL patterns in op.execute()."""
 
-from typing import List
-
 from ..analyzers.sql_analyzer import SqlAnalyzer
 from ..models import Issue, MigrationOp
 from .base import Rule
@@ -22,7 +20,7 @@ class SqlPatternRule(Rule):
         """Initializes rule with SQL analyzer."""
         self._sql_analyzer = SqlAnalyzer()
 
-    def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+    def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
         """
         Checks execute operation for dangerous SQL patterns.
 
@@ -35,7 +33,7 @@ class SqlPatternRule(Rule):
             List of found issues (Issue). Returns empty list,
             if operation is not related to execute or SQL is dynamic.
         """
-        issues: List[Issue] = []
+        issues: list[Issue] = []
 
         # Check only execute operations
         if operation.type != "execute":

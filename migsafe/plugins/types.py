@@ -1,6 +1,6 @@
 """Type definitions for plugin module."""
 
-from typing import Any, Dict, List, TypedDict
+from typing import Any, TypedDict
 
 
 class PluginConfigDict(TypedDict, total=False):
@@ -11,8 +11,8 @@ class PluginConfigDict(TypedDict, total=False):
         enabled: List of paths to plugin modules (e.g., "myplugin.plugin:MyPlugin")
     """
 
-    directories: List[str]
-    enabled: List[str]
+    directories: list[str]
+    enabled: list[str]
 
 
 class PluginMetrics:
@@ -24,7 +24,7 @@ class PluginMetrics:
         self.plugins_failed: int = 0
         self.load_time_seconds: float = 0.0
         self.rules_count: int = 0
-        self.errors: List[str] = []
+        self.errors: list[str] = []
 
     def reset(self) -> None:
         """Reset all metrics."""
@@ -34,7 +34,7 @@ class PluginMetrics:
         self.rules_count = 0
         self.errors = []
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert metrics to dictionary.
 
         Returns:

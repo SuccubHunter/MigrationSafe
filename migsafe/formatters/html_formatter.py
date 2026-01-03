@@ -3,7 +3,6 @@
 import html
 from datetime import datetime
 from pathlib import Path
-from typing import List, Tuple
 
 from ..base import AnalyzerResult
 from ..models import Issue, IssueSeverity
@@ -150,7 +149,7 @@ class HtmlFormatter(Formatter):
 </html>
 """
 
-    def format(self, results: List[Tuple[Path, AnalyzerResult]]) -> str:
+    def format(self, results: list[tuple[Path, AnalyzerResult]]) -> str:
         """Format analysis results as HTML."""
         try:
             # Calculate statistics
@@ -202,7 +201,7 @@ class HtmlFormatter(Formatter):
         except Exception as e:
             raise RuntimeError(f"Error formatting HTML: {e}") from e
 
-    def _format_migration(self, file_path: Path, result: AnalyzerResult, issues: List[Issue]) -> str:
+    def _format_migration(self, file_path: Path, result: AnalyzerResult, issues: list[Issue]) -> str:
         """Format a single migration."""
         # Data validation
         if not isinstance(file_path, Path):

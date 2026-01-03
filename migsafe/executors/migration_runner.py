@@ -1,6 +1,7 @@
 """Class for executing migrations on snapshots."""
 
 import ast
+import contextlib
 import logging
 import re
 import threading
@@ -264,10 +265,7 @@ class MigrationRunner:
 
         try:
             # Configure Alembic to work with restored database
-            if self.alembic_cfg_path:
-                alembic_cfg = Config(str(self.alembic_cfg_path))
-            else:
-                alembic_cfg = Config()
+            alembic_cfg = Config(str(self.alembic_cfg_path)) if self.alembic_cfg_path else Config()
 
             # Set connection URL
             alembic_cfg.set_main_option("sqlalchemy.url", restored_db_url)
@@ -326,10 +324,8 @@ class MigrationRunner:
                     logger.warning(f"Failed to collect 'after' metrics: {e}")
 
             # Close connection
-            try:
+            with contextlib.suppress(Exception):
                 connection.close()
-            except Exception:
-                pass
 
             # Delete temporary database (optional, can be left for debugging)
             # self.executor._drop_database(parsed.path.lstrip("/"))

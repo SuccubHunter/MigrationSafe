@@ -8,7 +8,7 @@ import sys
 import time
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Optional, Union
 
 from .base import Plugin
 from .base_loader import BasePluginLoader
@@ -40,10 +40,10 @@ class PluginLoader(BasePluginLoader):
             metrics: Object for collecting metrics (optional)
         """
         super().__init__(metrics)
-        self._loaded_modules: Set[str] = set()
-        self._module_cache: Dict[str, ModuleType] = {}
+        self._loaded_modules: set[str] = set()
+        self._module_cache: dict[str, ModuleType] = {}
 
-    def load(self) -> List[Plugin]:
+    def load(self) -> list[Plugin]:
         """Load plugins from all available sources.
 
         This method is part of the BasePluginLoader interface, but for backward
@@ -56,7 +56,7 @@ class PluginLoader(BasePluginLoader):
         plugins.extend(self.load_from_entry_points())
         return plugins
 
-    def load_from_entry_points(self, group: str = "migsafe.plugins") -> List[Plugin]:
+    def load_from_entry_points(self, group: str = "migsafe.plugins") -> list[Plugin]:
         """Load plugins via setuptools entry points.
 
         The method supports different Python versions and libraries for working with entry points:
@@ -79,11 +79,11 @@ class PluginLoader(BasePluginLoader):
             >>> plugins = loader.load_from_entry_points("migsafe.plugins")
             >>> print(f"Loaded plugins: {len(plugins)}")
         """
-        plugins: List[Plugin] = []
+        plugins: list[Plugin] = []
         start_time = time.time()
 
         try:
-            entry_points_list: List[Any] = []
+            entry_points_list: list[Any] = []
             try:
                 from importlib.metadata import entry_points as _entry_points_func
 
@@ -96,17 +96,11 @@ class PluginLoader(BasePluginLoader):
                     else:
                         # Python < 3.10 - entry_points() returns dict
                         all_entry_points = _entry_points_func()
-                        if isinstance(all_entry_points, dict):
-                            entry_points_list = all_entry_points.get(group, [])
-                        else:
-                            entry_points_list = []
+                        entry_points_list = all_entry_points.get(group, []) if isinstance(all_entry_points, dict) else []
                 except TypeError:
                     # Python < 3.10 - entry_points() returns dict
                     all_entry_points = _entry_points_func()
-                    if isinstance(all_entry_points, dict):
-                        entry_points_list = all_entry_points.get(group, [])
-                    else:
-                        entry_points_list = []
+                    entry_points_list = all_entry_points.get(group, []) if isinstance(all_entry_points, dict) else []
             except ImportError:
                 # Python < 3.10 - use importlib_metadata
                 try:
@@ -118,16 +112,10 @@ class PluginLoader(BasePluginLoader):
                             entry_points_list = list(ep_result)
                         else:
                             all_entry_points = _entry_points_func()
-                            if isinstance(all_entry_points, dict):
-                                entry_points_list = all_entry_points.get(group, [])
-                            else:
-                                entry_points_list = []
+                            entry_points_list = all_entry_points.get(group, []) if isinstance(all_entry_points, dict) else []
                     except TypeError:
                         all_entry_points = _entry_points_func()
-                        if isinstance(all_entry_points, dict):
-                            entry_points_list = all_entry_points.get(group, [])
-                        else:
-                            entry_points_list = []
+                        entry_points_list = all_entry_points.get(group, []) if isinstance(all_entry_points, dict) else []
                 except ImportError:
                     # Fallback to pkg_resources
                     try:
@@ -173,7 +161,7 @@ class PluginLoader(BasePluginLoader):
 
         return plugins
 
-    def load_from_directory(self, directory: str) -> List[Plugin]:
+    def load_from_directory(self, directory: str) -> list[Plugin]:
         """Load plugins from directory.
 
         Args:
@@ -188,7 +176,7 @@ class PluginLoader(BasePluginLoader):
             >>> for plugin in plugins:
             ...     print(f"Loaded: {plugin.name}")
         """
-        plugins: List[Plugin] = []
+        plugins: list[Plugin] = []
         directory_path = Path(directory)
 
         if not directory_path.exists():
@@ -214,7 +202,7 @@ class PluginLoader(BasePluginLoader):
 
         return plugins
 
-    def load_from_config(self, config: Union[Dict, PluginConfigDict]) -> List[Plugin]:
+    def load_from_config(self, config: Union[dict, PluginConfigDict]) -> list[Plugin]:
         """Load plugins from configuration file.
 
         The method accepts a full configuration dictionary and extracts the "plugins"
@@ -237,17 +225,13 @@ class PluginLoader(BasePluginLoader):
             >>> plugins_config = {"directories": ["my_plugins"]}
             >>> plugins = loader.load_from_config(plugins_config)
         """
-        plugins: List[Plugin] = []
+        plugins: list[Plugin] = []
 
         # If config already contains "plugins" section, extract it
         # Otherwise assume the passed configuration is already the plugins section
-        plugins_config: Union[Dict[str, Any], PluginConfigDict] = {}
-        if "plugins" in config and isinstance(config.get("plugins"), dict):
-            plugins_config = config.get("plugins", {})  # type: ignore[assignment]
-        else:
-            # If "plugins" is not in config, assume the passed configuration
-            # is already the plugins section
-            plugins_config = config
+        plugins_config: Union[dict[str, Any], PluginConfigDict] = (
+            config.get("plugins", {}) if "plugins" in config and isinstance(config.get("plugins"), dict) else config
+        )
 
         start_time = time.time()
 

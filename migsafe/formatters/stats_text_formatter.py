@@ -1,6 +1,6 @@
 """Text formatter for migration statistics."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from ..stats import MigrationStats
 from .base import StatsFormatter
@@ -33,7 +33,7 @@ class StatsTextFormatter(StatsFormatter):
             return text
         return f"{color}{text}{self.COLOR_RESET}"
 
-    def format(self, stats: MigrationStats, recommendations: List[Dict[str, Any]]) -> str:
+    def format(self, stats: MigrationStats, recommendations: list[dict[str, Any]]) -> str:
         """
         Format statistics as text.
 

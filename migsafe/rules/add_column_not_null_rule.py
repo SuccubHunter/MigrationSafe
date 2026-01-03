@@ -1,7 +1,5 @@
 """Rule for checking ADD COLUMN NOT NULL."""
 
-from typing import List
-
 from ..models import Issue, IssueSeverity, IssueType, MigrationOp
 from .base import Rule
 
@@ -17,7 +15,7 @@ class AddColumnNotNullRule(Rule):
 
     name = "add_column_not_null"
 
-    def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+    def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
         """Checks add_column operation for NOT NULL without safe pattern.
 
         Args:
@@ -29,7 +27,7 @@ class AddColumnNotNullRule(Rule):
             List of found issues (Issue). Returns empty list,
             if operation is safe or not related to add_column.
         """
-        issues: List[Issue] = []
+        issues: list[Issue] = []
 
         # Check only add_column operations
         if operation.type != "add_column":

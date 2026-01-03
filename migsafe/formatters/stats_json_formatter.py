@@ -2,7 +2,7 @@
 
 import json
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from .. import __version__
 from ..stats import MigrationStats
@@ -12,7 +12,7 @@ from .base import StatsFormatter
 class StatsJsonFormatter(StatsFormatter):
     """JSON formatter for statistics."""
 
-    def format(self, stats: MigrationStats, recommendations: List[Dict[str, Any]]) -> str:
+    def format(self, stats: MigrationStats, recommendations: list[dict[str, Any]]) -> str:
         """
         Format statistics as JSON.
 

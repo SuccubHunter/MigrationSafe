@@ -26,11 +26,13 @@ def mock_db_url():
 @pytest.fixture
 def snapshot_executor(mock_db_url):
     """Fixture for creating SnapshotExecutor with mocks."""
-    with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-        with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-            with patch("migsafe.executors.snapshot_executor.subprocess"):
-                executor = SnapshotExecutor(db_url=mock_db_url)
-                return executor
+    with (
+        patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+        patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+        patch("migsafe.executors.snapshot_executor.subprocess"),
+    ):
+        executor = SnapshotExecutor(db_url=mock_db_url)
+        return executor
 
 
 class TestSnapshotExecutor:
@@ -38,114 +40,134 @@ class TestSnapshotExecutor:
 
     def test_snapshot_executor_initialization(self, mock_db_url):
         """Check initialization with database connection parameters."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-                executor = SnapshotExecutor(db_url=mock_db_url)
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+        ):
+            executor = SnapshotExecutor(db_url=mock_db_url)
 
-                assert executor.db_url == mock_db_url
-                assert executor.snapshot_name is not None
-                assert executor.snapshot_dir.exists()
+            assert executor.db_url == mock_db_url
+            assert executor.snapshot_name is not None
+            assert executor.snapshot_dir.exists()
 
     def test_snapshot_executor_initialization_with_name(self, mock_db_url):
         """Check initialization with specified snapshot name."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-                executor = SnapshotExecutor(db_url=mock_db_url, snapshot_name="test_snapshot")
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+        ):
+            executor = SnapshotExecutor(db_url=mock_db_url, snapshot_name="test_snapshot")
 
-                assert executor.snapshot_name == "test_snapshot"
+            assert executor.snapshot_name == "test_snapshot"
 
     def test_snapshot_executor_generates_unique_name(self, mock_db_url):
         """Check generation of unique snapshot name."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-                executor1 = SnapshotExecutor(db_url=mock_db_url)
-                executor2 = SnapshotExecutor(db_url=mock_db_url)
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+        ):
+            executor1 = SnapshotExecutor(db_url=mock_db_url)
+            executor2 = SnapshotExecutor(db_url=mock_db_url)
 
-                # Names should be different (contain timestamp)
-                assert executor1.snapshot_name != executor2.snapshot_name
+            # Names should be different (contain timestamp)
+            assert executor1.snapshot_name != executor2.snapshot_name
 
     def test_snapshot_executor_parses_db_url(self, mock_db_url):
         """Check parsing of connection URL."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-                executor = SnapshotExecutor(db_url=mock_db_url)
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+        ):
+            executor = SnapshotExecutor(db_url=mock_db_url)
 
-                assert executor.db_host == "localhost"
-                assert executor.db_port == 5432
-                assert executor.db_name == "test_db"
-                assert executor.db_user == "user"
-                assert executor.db_password == "password"
+            assert executor.db_host == "localhost"
+            assert executor.db_port == 5432
+            assert executor.db_name == "test_db"
+            assert executor.db_user == "user"
+            assert executor.db_password == "password"
 
     def test_snapshot_executor_handles_connection_errors(self, mock_db_url):
         """Handle database connection errors."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True) as mock_psycopg2:
-                mock_psycopg2.connect.side_effect = Exception("Connection failed")
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True) as mock_psycopg2,
+        ):
+            mock_psycopg2.connect.side_effect = Exception("Connection failed")
 
-                # Initialization should succeed (connection happens only when creating snapshot)
-                executor = SnapshotExecutor(db_url=mock_db_url)
-                assert executor is not None
+            # Initialization should succeed (connection happens only when creating snapshot)
+            executor = SnapshotExecutor(db_url=mock_db_url)
+            assert executor is not None
 
     def test_snapshot_executor_creates_snapshot(self, mock_db_url):
         """Check database snapshot creation."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-                with patch("migsafe.executors.snapshot_executor.subprocess") as mock_subprocess:
-                    mock_subprocess.run.return_value = Mock(returncode=0, stdout="", stderr="")
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+            patch("migsafe.executors.snapshot_executor.subprocess") as mock_subprocess,
+        ):
+            mock_subprocess.run.return_value = Mock(returncode=0, stdout="", stderr="")
 
-                    executor = SnapshotExecutor(db_url=mock_db_url)
+            executor = SnapshotExecutor(db_url=mock_db_url)
 
-                    # Mock snapshot file existence
-                    with patch.object(Path, "exists", return_value=True):
-                        with patch.object(Path, "stat") as mock_stat:
-                            mock_stat.return_value.st_size = 1024
-                            snapshot_name = executor.create_snapshot()
+            # Mock snapshot file existence
+            with (
+                patch.object(Path, "exists", return_value=True),
+                patch.object(Path, "stat") as mock_stat,
+            ):
+                mock_stat.return_value.st_size = 1024
+                snapshot_name = executor.create_snapshot()
 
-                            assert snapshot_name == executor.snapshot_name
-                            assert snapshot_name in executor.snapshots
+                assert snapshot_name == executor.snapshot_name
+                assert snapshot_name in executor.snapshots
 
     def test_snapshot_executor_handles_snapshot_errors(self, mock_db_url):
         """Handle snapshot creation errors."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-                with patch("migsafe.executors.snapshot_executor.subprocess") as mock_subprocess:
-                    from subprocess import CalledProcessError
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+            patch("migsafe.executors.snapshot_executor.subprocess") as mock_subprocess,
+        ):
+            from subprocess import CalledProcessError
 
-                    mock_subprocess.run.side_effect = CalledProcessError(1, "pg_dump", stderr="Error")
+            mock_subprocess.run.side_effect = CalledProcessError(1, "pg_dump", stderr="Error")
 
-                    executor = SnapshotExecutor(db_url=mock_db_url)
+            executor = SnapshotExecutor(db_url=mock_db_url)
 
-                    with pytest.raises(RuntimeError):
-                        executor.create_snapshot()
+            with pytest.raises(RuntimeError):
+                executor.create_snapshot()
 
     def test_snapshot_executor_list_snapshots(self, mock_db_url):
         """Check list of all snapshots."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-                executor = SnapshotExecutor(db_url=mock_db_url)
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+        ):
+            executor = SnapshotExecutor(db_url=mock_db_url)
 
-                snapshots = executor.list_snapshots()
-                assert isinstance(snapshots, list)
+            snapshots = executor.list_snapshots()
+            assert isinstance(snapshots, list)
 
     def test_snapshot_executor_delete_snapshot(self, mock_db_url):
         """Check snapshot deletion."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-                executor = SnapshotExecutor(db_url=mock_db_url)
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+        ):
+            executor = SnapshotExecutor(db_url=mock_db_url)
 
-                # Add test snapshot
-                metadata = SnapshotMetadata(
-                    name="test_snapshot",
-                    created_at=datetime.now().isoformat(),
-                    db_url=mock_db_url,
-                    snapshot_path=str(executor.snapshot_dir / "test_snapshot.dump"),
-                )
-                executor.snapshots["test_snapshot"] = metadata
+            # Add test snapshot
+            metadata = SnapshotMetadata(
+                name="test_snapshot",
+                created_at=datetime.now().isoformat(),
+                db_url=mock_db_url,
+                snapshot_path=str(executor.snapshot_dir / "test_snapshot.dump"),
+            )
+            executor.snapshots["test_snapshot"] = metadata
 
-                with patch.object(Path, "exists", return_value=True), patch.object(Path, "unlink"):
-                    executor.delete_snapshot("test_snapshot")
+            with patch.object(Path, "exists", return_value=True), patch.object(Path, "unlink"):
+                executor.delete_snapshot("test_snapshot")
 
-                    assert "test_snapshot" not in executor.snapshots
+                assert "test_snapshot" not in executor.snapshots
 
 
 class TestLockDetector:
@@ -265,37 +287,39 @@ class TestMigrationRunner:
 
     def test_migration_runner_initialization(self, mock_db_url):
         """Check runner initialization."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-                with patch("migsafe.executors.migration_runner.PSYCOPG2_AVAILABLE", True):
-                    with patch("migsafe.executors.migration_runner.psycopg2", create=True):
-                        with patch("migsafe.executors.migration_runner.ALEMBIC_AVAILABLE", True):
-                            # Mock alembic module with create=True, as it may not be imported
-                            with patch("migsafe.executors.migration_runner.command", create=True):
-                                with patch("migsafe.executors.migration_runner.Config", create=True):
-                                    executor = SnapshotExecutor(db_url=mock_db_url)
-                                    runner = MigrationRunner(executor)
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+            patch("migsafe.executors.migration_runner.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.migration_runner.psycopg2", create=True),
+            patch("migsafe.executors.migration_runner.ALEMBIC_AVAILABLE", True),
+            patch("migsafe.executors.migration_runner.command", create=True),
+            patch("migsafe.executors.migration_runner.Config", create=True),
+        ):
+            # Mock alembic module with create=True, as it may not be imported
+            executor = SnapshotExecutor(db_url=mock_db_url)
+            runner = MigrationRunner(executor)
 
-                                    assert runner.executor == executor
-                                    assert runner.lock_detector is not None
-                                    assert runner.metrics_collector is not None
+            assert runner.executor == executor
+            assert runner.lock_detector is not None
+            assert runner.metrics_collector is not None
 
     def test_migration_runner_handles_missing_migration_file(self, mock_db_url):
         """Handle missing migration file."""
-        with patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True):
-            with patch("migsafe.executors.snapshot_executor.psycopg2", create=True):
-                with patch("migsafe.executors.migration_runner.PSYCOPG2_AVAILABLE", True):
-                    with patch("migsafe.executors.migration_runner.psycopg2", create=True):
-                        with patch("migsafe.executors.migration_runner.ALEMBIC_AVAILABLE", True):
-                            # Mock alembic module with create=True, as it may not be imported
-                            with patch("migsafe.executors.migration_runner.command", create=True):
-                                with patch("migsafe.executors.migration_runner.Config", create=True):
-                                    executor = SnapshotExecutor(db_url=mock_db_url)
-                                    runner = MigrationRunner(executor)
+        with (
+            patch("migsafe.executors.snapshot_executor.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.snapshot_executor.psycopg2", create=True),
+            patch("migsafe.executors.migration_runner.PSYCOPG2_AVAILABLE", True),
+            patch("migsafe.executors.migration_runner.psycopg2", create=True),
+            patch("migsafe.executors.migration_runner.ALEMBIC_AVAILABLE", True),
+            patch("migsafe.executors.migration_runner.command", create=True),
+            patch("migsafe.executors.migration_runner.Config", create=True),
+        ):
+            # Mock alembic module with create=True, as it may not be imported
+            executor = SnapshotExecutor(db_url=mock_db_url)
+            runner = MigrationRunner(executor)
 
-                                    result = runner.run_migration(
-                                        migration_path="/nonexistent/migration.py", create_snapshot=False
-                                    )
+            result = runner.run_migration(migration_path="/nonexistent/migration.py", create_snapshot=False)
 
-                                    assert result.success is False
-                                    assert "not found" in result.error.lower()
+            assert result.success is False
+            assert "not found" in result.error.lower()

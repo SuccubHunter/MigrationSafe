@@ -1,7 +1,7 @@
 """Class for analyzing commits."""
 
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel
 
@@ -27,8 +27,8 @@ class MigrationInfo(BaseModel):
     """
 
     migration_type: Optional[str] = None
-    tables: List[str]
-    operations: List[str]
+    tables: list[str]
+    operations: list[str]
     is_revert: bool = False
 
 
@@ -63,7 +63,7 @@ class CommitAnalyzer:
         """
         pass
 
-    def _extract_info_from_message(self, message: str) -> Dict[str, Any]:
+    def _extract_info_from_message(self, message: str) -> dict[str, Any]:
         """Common logic for extracting information from commit message.
 
         Args:
@@ -152,7 +152,7 @@ class CommitAnalyzer:
             is_revert=info["is_revert"],
         )
 
-    def detect_revert_commits(self, commits: List[CommitInfo]) -> List[CommitInfo]:
+    def detect_revert_commits(self, commits: list[CommitInfo]) -> list[CommitInfo]:
         """Detect rollback commits.
 
         Args:
@@ -178,7 +178,7 @@ class CommitAnalyzer:
 
         return revert_commits
 
-    def find_related_commits(self, commit: CommitInfo, all_commits: List[CommitInfo]) -> List[CommitInfo]:
+    def find_related_commits(self, commit: CommitInfo, all_commits: list[CommitInfo]) -> list[CommitInfo]:
         """Find related commits.
 
         Args:
@@ -217,7 +217,7 @@ class CommitAnalyzer:
 
         return related
 
-    def analyze_commit_message(self, message: str) -> Dict[str, Any]:
+    def analyze_commit_message(self, message: str) -> dict[str, Any]:
         """Analyze commit message.
 
         Args:

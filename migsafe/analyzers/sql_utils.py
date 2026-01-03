@@ -1,7 +1,6 @@
 """Utilities for working with SQL queries."""
 
 import re
-from typing import Tuple
 
 
 def normalize_sql(sql: str) -> str:
@@ -30,7 +29,7 @@ def normalize_sql(sql: str) -> str:
     return sql.strip()
 
 
-def validate_sql_input(sql: str, operation_index: int) -> Tuple[bool, str]:
+def validate_sql_input(sql: str, operation_index: int) -> tuple[bool, str]:
     """
     Validate input data for SQL analyzer.
 

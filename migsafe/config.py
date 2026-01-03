@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -11,7 +11,7 @@ class Config(BaseModel):
     """Configuration for migsafe."""
 
     # Exclusions
-    exclude: Optional[List[str]] = Field(default=None, description="Patterns for excluding files")
+    exclude: Optional[list[str]] = Field(default=None, description="Patterns for excluding files")
 
     # Output format
     format: Optional[str] = Field(default=None, description="Output format (text, json, html, junit, sarif)")
@@ -28,7 +28,7 @@ class Config(BaseModel):
     exit_code: Optional[bool] = Field(default=None, description="Return non-zero code on critical issues")
 
     # Plugins
-    plugins: Optional[Dict[str, Any]] = Field(default=None, description="Plugin configuration")
+    plugins: Optional[dict[str, Any]] = Field(default=None, description="Plugin configuration")
 
     model_config = ConfigDict(extra="ignore")  # Ignore additional fields
 
@@ -71,17 +71,17 @@ def _load_json_config(config_path: Path) -> Config:
             data = json.load(f)
         return Config(**data)
     except json.JSONDecodeError as e:
-        raise ValueError(f"JSON parsing error in {config_path}: {e}")
+        raise ValueError(f"JSON parsing error in {config_path}: {e}") from e
     except Exception as e:
-        raise ValueError(f"Error loading configuration from {config_path}: {e}")
+        raise ValueError(f"Error loading configuration from {config_path}: {e}") from e
 
 
 def _load_toml_config(config_path: Path) -> Config:
     """Loads configuration from a TOML file."""
     try:
         import tomli
-    except ImportError:
-        raise ValueError("tomli library is required for TOML file support. Install it: pip install tomli")
+    except ImportError as e:
+        raise ValueError("tomli library is required for TOML file support. Install it: pip install tomli") from e
 
     try:
         with open(config_path, "rb") as f:
@@ -91,10 +91,10 @@ def _load_toml_config(config_path: Path) -> Config:
         config_data = data.get("migsafe", data)
         return Config(**config_data)
     except Exception as e:
-        raise ValueError(f"Error loading TOML configuration from {config_path}: {e}")
+        raise ValueError(f"Error loading TOML configuration from {config_path}: {e}") from e
 
 
-def apply_config_to_cli_params(config: Config, cli_params: Dict[str, Any]) -> Dict[str, Any]:
+def apply_config_to_cli_params(config: Config, cli_params: dict[str, Any]) -> dict[str, Any]:
     """
     Applies settings from configuration to CLI parameters.
 

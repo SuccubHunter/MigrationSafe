@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import BaseModel
 
@@ -34,7 +34,7 @@ class LockInfo(BaseModel):
     mode: str
     granted: bool
     duration: float
-    blocked_queries: List[str]
+    blocked_queries: list[str]
     detected_at: datetime
 
 
@@ -43,9 +43,9 @@ class LockDetector:
 
     def __init__(self):
         """Initialize detector."""
-        self.detected_locks: List[LockInfo] = []
+        self.detected_locks: list[LockInfo] = []
 
-    def detect_locks(self, connection) -> List[LockInfo]:
+    def detect_locks(self, connection) -> list[LockInfo]:
         """Detect locks.
 
         Args:
@@ -108,7 +108,7 @@ class LockDetector:
 
     def monitor_locks(
         self, connection, duration: float, interval: float = 0.5, stop_event: Optional["threading.Event"] = None
-    ) -> List[LockInfo]:
+    ) -> list[LockInfo]:
         """Monitor locks over time.
 
         Args:
@@ -151,7 +151,7 @@ class LockDetector:
             time.sleep(interval)
 
         # Remove duplicates, keeping latest versions
-        unique_locks: Dict[str, LockInfo] = {}
+        unique_locks: dict[str, LockInfo] = {}
         for lock in all_locks:
             key = f"{lock.relation}:{lock.mode}:{lock.granted}"
             if key not in unique_locks or lock.duration > unique_locks[key].duration:
@@ -177,10 +177,7 @@ class LockDetector:
             mode_without_lock = mode[:-4] if mode.endswith("Lock") else mode[:-4]
             # Split by capital letters and join with spaces
             parts = re.findall(r"[A-Z][a-z]*", mode_without_lock)
-            if parts:
-                mode_upper = " ".join(p.upper() for p in parts)
-            else:
-                mode_upper = mode.upper()
+            mode_upper = " ".join(p.upper() for p in parts) if parts else mode.upper()
         else:
             mode_upper = mode.upper()
 
@@ -205,7 +202,7 @@ class LockDetector:
             # Default to ROW_EXCLUSIVE
             return LockType.ROW_EXCLUSIVE
 
-    def _find_blocked_queries(self, connection, relation: str, mode: str) -> List[str]:
+    def _find_blocked_queries(self, connection, relation: str, mode: str) -> list[str]:
         """Find queries blocked by this lock.
 
         Args:

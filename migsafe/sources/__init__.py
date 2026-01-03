@@ -2,7 +2,7 @@
 
 import ast
 from pathlib import Path
-from typing import List, Union
+from typing import Union
 
 from ..base import MigrationSource
 from .alembic_source import AlembicMigrationSource
@@ -90,15 +90,13 @@ def detect_migration_type(file_path: Union[str, Path]) -> str:
         # Check Django Migration classes
         elif isinstance(node, ast.ClassDef):
             for base in node.bases:
-                if isinstance(base, ast.Attribute):
+                if isinstance(base, ast.Attribute) and base.attr == "Migration":
                     # migrations.Migration
-                    if base.attr == "Migration":
-                        if isinstance(base.value, ast.Name) and base.value.id == "migrations":
-                            has_django_migration_class = True
-                elif isinstance(base, ast.Name):
-                    # Migration (if imported directly)
-                    if base.id == "Migration" and has_django_import:
+                    if isinstance(base.value, ast.Name) and base.value.id == "migrations":
                         has_django_migration_class = True
+                elif isinstance(base, ast.Name) and base.id == "Migration" and has_django_import:
+                    # Migration (if imported directly)
+                    has_django_migration_class = True
 
         # Check upgrade() function for Alembic
         elif isinstance(node, ast.FunctionDef) and node.name == "upgrade":
@@ -254,7 +252,7 @@ def detect_django_project(root_path: Union[str, Path]) -> bool:
     return settings_found or migrations_found
 
 
-def find_django_migration_directories(root_path: Union[str, Path]) -> List[Path]:
+def find_django_migration_directories(root_path: Union[str, Path]) -> list[Path]:
     """Finds all directories with Django migrations in project.
 
     Searches for migrations directories in Django project structure.

@@ -2,7 +2,6 @@
 
 import re
 from re import Pattern
-from typing import Dict, List
 
 from ..models import Issue, IssueSeverity, IssueType
 from .base_sql_analyzer import BaseSqlAnalyzer
@@ -25,12 +24,12 @@ class SqlJoinAnalyzer(BaseSqlAnalyzer):
         <IssueType.SQL_UPDATE_WITH_JOIN: 'sql_update_with_join'>
     """
 
-    def _compile_patterns(self) -> Dict[str, Pattern]:
+    def _compile_patterns(self) -> dict[str, Pattern]:
         """Compile regular expressions for pattern matching."""
         # Use common patterns from sql_patterns
         return get_sql_join_patterns()
 
-    def _analyze_normalized(self, sql: str, operation_index: int) -> List[Issue]:
+    def _analyze_normalized(self, sql: str, operation_index: int) -> list[Issue]:
         """Analyze JOIN in normalized SQL query.
 
         Args:
@@ -48,7 +47,7 @@ class SqlJoinAnalyzer(BaseSqlAnalyzer):
 
         return issues
 
-    def _check_update_with_join(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_update_with_join(self, sql: str, operation_index: int) -> list[Issue]:
         """Check UPDATE with JOIN."""
         issues = []
 
@@ -106,29 +105,28 @@ class SqlJoinAnalyzer(BaseSqlAnalyzer):
             # Check that this is really UPDATE with JOIN (not just UPDATE with SET)
             # Search for JOIN presence in query
             update_part = match.group(0)
-            if re.search(r"\b(?:INNER|LEFT|RIGHT|FULL|CROSS)?\s+JOIN\b", update_part, re.IGNORECASE):
-                if table2:
-                    issues.append(
-                        Issue(
-                            severity=IssueSeverity.WARNING,
-                            type=IssueType.SQL_UPDATE_WITH_JOIN,
-                            message=f"UPDATE {table1} with JOIN {table2} may lock both tables",
-                            operation_index=operation_index,
-                            recommendation=(
-                                "UPDATE with JOIN may lock multiple tables and be slow.\n"
-                                "Recommendations:\n"
-                                "1) Use batching via subqueries with LIMIT\n"
-                                "2) Consider using temporary tables\n"
-                                "3) Check indexes on tables in JOIN\n"
-                                "4) Execute operation during low load period"
-                            ),
-                            table=table1,
-                        )
+            if re.search(r"\b(?:INNER|LEFT|RIGHT|FULL|CROSS)?\s+JOIN\b", update_part, re.IGNORECASE) and table2:
+                issues.append(
+                    Issue(
+                        severity=IssueSeverity.WARNING,
+                        type=IssueType.SQL_UPDATE_WITH_JOIN,
+                        message=f"UPDATE {table1} with JOIN {table2} may lock both tables",
+                        operation_index=operation_index,
+                        recommendation=(
+                            "UPDATE with JOIN may lock multiple tables and be slow.\n"
+                            "Recommendations:\n"
+                            "1) Use batching via subqueries with LIMIT\n"
+                            "2) Consider using temporary tables\n"
+                            "3) Check indexes on tables in JOIN\n"
+                            "4) Execute operation during low load period"
+                        ),
+                        table=table1,
                     )
+                )
 
         return issues
 
-    def _check_delete_with_join(self, sql: str, operation_index: int) -> List[Issue]:
+    def _check_delete_with_join(self, sql: str, operation_index: int) -> list[Issue]:
         """Check DELETE with JOIN."""
         issues = []
 

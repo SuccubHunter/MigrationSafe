@@ -1,7 +1,6 @@
 """Base class for migration analysis rules."""
 
 from abc import ABC, abstractmethod
-from typing import List
 
 from ..models import Issue, MigrationOp
 
@@ -37,7 +36,7 @@ class Rule(ABC):
             raise TypeError(f"{cls.__name__} must define 'name' attribute")
 
     @abstractmethod
-    def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+    def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
         """
         Checks migration operation for problems.
 

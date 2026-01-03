@@ -3,8 +3,6 @@
 This example demonstrates how to create a custom plugin with custom rules.
 """
 
-from typing import List
-
 from migsafe.models import Issue, IssueSeverity, IssueType, MigrationOp
 from migsafe.plugins import Plugin
 from migsafe.rules.base import Rule
@@ -15,7 +13,7 @@ class CustomColumnRule(Rule):
 
     name = "custom_add_column_to_users"
 
-    def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+    def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
         """Checks column additions to the users table."""
         issues = []
 
@@ -54,6 +52,6 @@ class MyCustomPlugin(Plugin):
     def author(self) -> str:
         return "Your Name"
 
-    def get_rules(self) -> List[Rule]:
+    def get_rules(self) -> list[Rule]:
         """Returns a list of rules provided by the plugin."""
         return [CustomColumnRule()]

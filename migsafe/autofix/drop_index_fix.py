@@ -2,7 +2,7 @@
 
 import ast
 import logging
-from typing import Optional, Tuple
+from typing import Optional
 
 from ..models import Issue, IssueType
 from .ast_utils import unparse_ast
@@ -19,7 +19,7 @@ class DropIndexFix(Autofix):
         """Checks if can fix DROP_INDEX_WITHOUT_CONCURRENTLY issue."""
         return issue.type == IssueType.DROP_INDEX_WITHOUT_CONCURRENTLY
 
-    def apply_fix(self, source_code: str, issue: Issue, ast_tree: Optional[ast.Module] = None) -> Tuple[str, bool]:
+    def apply_fix(self, source_code: str, issue: Issue, ast_tree: Optional[ast.Module] = None) -> tuple[str, bool]:
         """
         Adds postgresql_concurrently=True to op.drop_index call.
 
@@ -137,11 +137,10 @@ class DropIndexFinder(BaseOperationFinder):
 
     def _is_target_operation(self, node: ast.Call) -> bool:
         """Checks if the call is a drop_index operation."""
-        if isinstance(node.func, ast.Attribute):
-            if isinstance(node.func.value, ast.Name):
-                var_name = node.func.value.id
-                # Check op.drop_index or any batch_op.drop_index
-                return (var_name == "op" and node.func.attr == "drop_index") or (
-                    var_name in self.batch_context and node.func.attr == "drop_index"
-                )
+        if isinstance(node.func, ast.Attribute) and isinstance(node.func.value, ast.Name):
+            var_name = node.func.value.id
+            # Check op.drop_index or any batch_op.drop_index
+            return (var_name == "op" and node.func.attr == "drop_index") or (
+                var_name in self.batch_context and node.func.attr == "drop_index"
+            )
         return False

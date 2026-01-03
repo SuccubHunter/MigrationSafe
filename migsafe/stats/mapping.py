@@ -1,11 +1,9 @@
 """Mapping of issue types to rule names."""
 
-from typing import Dict, List
-
 from ..models import Issue, IssueType
 
 # Mapping IssueType -> rule name
-ISSUE_TYPE_TO_RULE_NAME: Dict[IssueType, str] = {
+ISSUE_TYPE_TO_RULE_NAME: dict[IssueType, str] = {
     IssueType.ADD_COLUMN_NOT_NULL: "add_column_not_null_rule",
     IssueType.CREATE_INDEX_WITHOUT_CONCURRENTLY: "create_index_concurrently_rule",
     IssueType.DROP_INDEX_WITHOUT_CONCURRENTLY: "drop_index_concurrently_rule",
@@ -37,7 +35,7 @@ ISSUE_TYPE_TO_RULE_NAME: Dict[IssueType, str] = {
 
 # Reverse index: rule name -> list of issue types
 # Created once when module is loaded for search optimization
-RULE_NAME_TO_ISSUE_TYPES: Dict[str, List[IssueType]] = {}
+RULE_NAME_TO_ISSUE_TYPES: dict[str, list[IssueType]] = {}
 for issue_type, rule_name in ISSUE_TYPE_TO_RULE_NAME.items():
     if rule_name not in RULE_NAME_TO_ISSUE_TYPES:
         RULE_NAME_TO_ISSUE_TYPES[rule_name] = []

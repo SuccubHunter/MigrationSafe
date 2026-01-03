@@ -1,12 +1,12 @@
 """Recommendations generator based on migration statistics."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from ..models import IssueType
 from .migration_stats import MigrationStats
 
 # Recommendations for different issue types
-ISSUE_RECOMMENDATIONS: Dict[IssueType, str] = {
+ISSUE_RECOMMENDATIONS: dict[IssueType, str] = {
     IssueType.ADD_COLUMN_NOT_NULL: (
         "It is recommended to use a safe pattern with batching: "
         "1) Add the column as nullable, 2) Fill data in batches, "
@@ -125,7 +125,7 @@ class RecommendationsGenerator:
         ...     print(f"{rec['priority']}: {rec['message']}")
     """
 
-    def generate(self, stats: MigrationStats) -> List[Dict[str, Any]]:
+    def generate(self, stats: MigrationStats) -> list[dict[str, Any]]:
         """
         Generates recommendations based on statistics.
 

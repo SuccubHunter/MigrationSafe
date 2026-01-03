@@ -1,7 +1,5 @@
 """Rule for checking DROP INDEX without CONCURRENTLY."""
 
-from typing import List
-
 from ..models import Issue, IssueSeverity, IssueType, MigrationOp
 from .base import Rule
 
@@ -16,7 +14,7 @@ class DropIndexWithoutConcurrentlyRule(Rule):
 
     name = "drop_index_without_concurrently"
 
-    def check(self, operation: MigrationOp, index: int, operations: List[MigrationOp]) -> List[Issue]:
+    def check(self, operation: MigrationOp, index: int, operations: list[MigrationOp]) -> list[Issue]:
         """Checks drop_index operation for CONCURRENTLY flag.
 
         Args:
@@ -28,7 +26,7 @@ class DropIndexWithoutConcurrentlyRule(Rule):
             List of found issues (Issue). Returns empty list,
             if operation is safe or not related to drop_index.
         """
-        issues: List[Issue] = []
+        issues: list[Issue] = []
 
         # Check only drop_index operations
         if operation.type != "drop_index":
