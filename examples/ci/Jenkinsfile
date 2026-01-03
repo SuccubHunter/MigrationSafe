@@ -1,0 +1,199 @@
+// Jenkins Pipeline example for checking migrations with migsafe
+//
+// Copy this file to project root as Jenkinsfile
+// or add stage to existing pipeline
+
+pipeline {
+    agent any
+    
+    // Environment settings
+    environment {
+        PYTHON_VERSION = '3.11'
+        MIGRATIONS_DIR = 'migrations'
+        REPORT_DIR = 'reports'
+    }
+    
+    options {
+        // Save artifacts after completion
+        archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
+        // Publish JUnit reports
+        junit 'reports/migsafe-report.xml'
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Setup Python') {
+            steps {
+                script {
+                    // Use pyenv or system Python
+                    sh '''
+                        python${PYTHON_VERSION} --version || python3 --version
+                        pip install --upgrade pip
+                        pip install migsafe
+                    '''
+                }
+            }
+        }
+        
+        stage('Check Migrations') {
+            steps {
+                script {
+                    // Create directory for reports
+                    sh 'mkdir -p ${REPORT_DIR}'
+                    
+                    // Strict mode: fails on critical issues
+                    sh '''
+                        migsafe lint \
+                            --format junit \
+                            --output ${REPORT_DIR}/migsafe-report.xml \
+                            --no-color \
+                            ${MIGRATIONS_DIR} || exit 1
+                    '''
+                }
+            }
+            post {
+                always {
+                    // Publish reports even if check failed
+                    junit 'reports/migsafe-report.xml'
+                    archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
+                }
+                failure {
+                    // Notifications on issue detection
+                    echo "❌ Critical issues found in migrations!"
+                    // Can add notification sending (email, Slack, etc.)
+                    // emailext subject: "Migration Check Failed", body: "..."
+                }
+            }
+        }
+        
+        // Optionally: HTML report generation
+        stage('Generate HTML Report') {
+            steps {
+                script {
+                    sh '''
+                        migsafe analyze \
+                            --format html \
+                            --output ${REPORT_DIR}/migsafe-report.html \
+                            --no-color \
+                            ${MIGRATIONS_DIR} || true
+                    '''
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Cleanup (optional)
+            cleanWs()
+        }
+        success {
+            echo "✅ All migration checks passed successfully"
+        }
+        failure {
+            echo "❌ Migration check completed with errors"
+        }
+    }
+}
+
+---
+// Alternative option: Declarative Pipeline with parameters
+
+pipeline {
+    agent any
+    
+    parameters {
+        choice(
+            name: 'CHECK_MODE',
+            choices: ['strict', 'soft'],
+            description: 'Check mode: strict (fails on critical) or soft (warnings only)'
+        )
+        string(
+            name: 'MIGRATIONS_PATH',
+            defaultValue: 'migrations',
+            description: 'Path to migrations directory'
+        )
+    }
+    
+    environment {
+        PYTHON_VERSION = '3.11'
+    }
+    
+    stages {
+        stage('Setup') {
+            steps {
+                checkout scm
+                sh 'pip install --upgrade pip && pip install migsafe'
+            }
+        }
+        
+        stage('Check Migrations') {
+            steps {
+                script {
+                    def command = params.CHECK_MODE == 'strict' 
+                        ? 'migsafe lint --format junit --output report.xml --no-color'
+                        : 'migsafe analyze --format text --no-color --severity warning || true'
+                    
+                    sh """
+                        ${command} ${params.MIGRATIONS_PATH}
+                    """
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            junit 'report.xml'
+            archiveArtifacts artifacts: 'report.xml', allowEmptyArchive: true
+        }
+    }
+}
+
+---
+// Example for Scripted Pipeline (more flexible)
+
+node {
+    def pythonVersion = '3.11'
+    def migrationsDir = 'migrations'
+    def reportFile = 'migsafe-report.xml'
+    
+    stage('Checkout') {
+        checkout scm
+    }
+    
+    stage('Setup') {
+        sh """
+            python${pythonVersion} --version || python3 --version
+            pip install --upgrade pip
+            pip install migsafe
+        """
+    }
+    
+    stage('Check Migrations') {
+        try {
+            sh """
+                migsafe lint \
+                    --format junit \
+                    --output ${reportFile} \
+                    --no-color \
+                    ${migrationsDir}
+            """
+            echo "✅ Migration check successful"
+        } catch (Exception e) {
+            echo "❌ Critical issues found: ${e.message}"
+            currentBuild.result = 'FAILURE'
+            // Send notifications
+            // slackSend(color: 'danger', message: "Migration check failed: ${e.message}")
+        } finally {
+            // Publish reports
+            junit reportFile
+            archiveArtifacts artifacts: reportFile, allowEmptyArchive: true
+        }
+    }
+}

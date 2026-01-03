@@ -1,0 +1,190 @@
+# CircleCI configuration example for checking migrations
+#
+# Copy this job to your .circleci/config.yml
+# or create a separate file and include via include
+
+version: 2.1
+
+# Define orb for reuse (optional)
+orbs:
+  python: circleci/python@2.1.1
+
+jobs:
+  check-migrations:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "requirements.txt" }}
+            - v1-deps-
+      
+      - run:
+          name: Install dependencies
+          command: |
+            pip install --upgrade pip
+            pip install migsafe
+            # If using requirements.txt:
+            # pip install -r requirements.txt
+      
+      - save_cache:
+          paths:
+            - ~/.cache/pip
+          key: v1-deps-{{ checksum "requirements.txt" }}
+      
+      - run:
+          name: Check migrations with migsafe
+          command: |
+            migsafe lint \
+              --format junit \
+              --output test-results/migsafe-report.xml \
+              --no-color \
+              migrations/ alembic/versions/
+      
+      - store_test_results:
+          path: test-results
+      
+      - store_artifacts:
+          path: test-results/migsafe-report.xml
+          destination: migsafe-report
+
+---
+# Alternative option: with HTML report and caching
+
+version: 2.1
+
+jobs:
+  check-migrations-full:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      
+      - restore_cache:
+          keys:
+            - migsafe-deps-v1-{{ checksum "pyproject.toml" }}
+            - migsafe-deps-v1-
+      
+      - run:
+          name: Install migsafe
+          command: |
+            pip install --upgrade pip
+            pip install migsafe
+      
+      - save_cache:
+          paths:
+            - ~/.cache/pip
+          key: migsafe-deps-v1-{{ checksum "pyproject.toml" }}
+      
+      - run:
+          name: Run migsafe lint (strict mode)
+          command: |
+            mkdir -p test-results reports
+            migsafe lint \
+              --format junit \
+              --output test-results/migsafe-report.xml \
+              --no-color \
+              migrations/ alembic/versions/
+      
+      - run:
+          name: Generate HTML report
+          command: |
+            migsafe analyze \
+              --format html \
+              --output reports/migsafe-report.html \
+              --no-color \
+              migrations/ alembic/versions/ || true
+      
+      - store_test_results:
+          path: test-results
+      
+      - store_artifacts:
+          path: reports
+          destination: migsafe-reports
+
+---
+# Integration into existing workflow
+
+version: 2.1
+
+workflows:
+  version: 2
+  test-and-check:
+    jobs:
+      - build
+      - check-migrations:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - main
+                - develop
+      - test:
+          requires:
+            - check-migrations
+
+jobs:
+  build:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run: echo "Building..."
+
+  check-migrations:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run:
+          name: Install migsafe
+          command: pip install migsafe
+      - run:
+          name: Check migrations
+          command: |
+            migsafe lint \
+              --format junit \
+              --output test-results/migsafe-report.xml \
+              --no-color
+      - store_test_results:
+          path: test-results
+
+  test:
+    docker:
+      - image: cimg/python:3.11
+    steps:
+      - checkout
+      - run: echo "Running tests..."
+
+---
+# Example using Python orb
+
+version: 2.1
+
+orbs:
+  python: circleci/python@2.1.1
+
+jobs:
+  check-migrations:
+    executor: python/default
+    steps:
+      - checkout
+      - python/install-packages:
+          pkg-manager: pip
+          pip-dependency-file: requirements.txt
+      - run:
+          name: Install migsafe
+          command: pip install migsafe
+      - run:
+          name: Check migrations
+          command: |
+            mkdir -p test-results
+            migsafe lint \
+              --format junit \
+              --output test-results/migsafe-report.xml \
+              --no-color
+      - store_test_results:
+          path: test-results

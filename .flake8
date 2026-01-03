@@ -1,0 +1,36 @@
+[flake8]
+# Maximum line length (compatible with black)
+max-line-length = 127
+
+# Ignored errors
+# E203: whitespace before ':' (conflicts with black)
+# E501: line too long (handled by black)
+# W503: line break before binary operator (conflicts with black)
+ignore = E203, E501, W503
+
+# Excluded directories
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    .eggs,
+    *.egg,
+    build,
+    dist,
+    .mypy_cache,
+    .pytest_cache,
+    migrations,
+    alembic/versions
+
+# Maximum function complexity
+max-complexity = 10
+
+# Show statistics
+statistics = True
+
+# Number of errors before stopping
+count = True
+
+# Show source code for errors
+show-source = True

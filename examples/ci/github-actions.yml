@@ -1,0 +1,109 @@
+# migsafe GitHub Actions integration example
+# 
+# Copy this file to .github/workflows/migration-check.yml
+# or add this job to an existing workflow
+
+name: Migration Safety Check
+
+on:
+  # Run on every Pull Request
+  pull_request:
+    paths:
+      - '**/migrations/**/*.py'
+      - '**/alembic/versions/**/*.py'
+      - '.github/workflows/migration-check.yml'
+  # Optionally: run on push to main/master
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - '**/migrations/**/*.py'
+      - '**/alembic/versions/**/*.py'
+
+jobs:
+  check-migrations:
+    name: Check Alembic Migrations
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install migsafe
+          # If using requirements.txt, install them too
+          # pip install -r requirements.txt
+      
+      - name: Run code linters
+        run: |
+          pip install black flake8 mypy isort
+          black --check migsafe || true
+          flake8 migsafe --max-line-length=127 || true
+          mypy migsafe --ignore-missing-imports || true
+          isort --check-only migsafe || true
+        continue-on-error: true
+      
+      - name: Run migsafe lint
+        # Strict mode: fails on critical issues
+        run: |
+          migsafe lint \
+            --format junit \
+            --output migsafe-report.xml \
+            --no-color
+        continue-on-error: false
+      
+      - name: Upload JUnit report
+        # Publish report in GitHub Actions UI
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: migsafe-report
+          path: migsafe-report.xml
+      
+      - name: Comment PR with results
+        # Comment PR with results (optional)
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const report = fs.readFileSync('migsafe-report.xml', 'utf8');
+              // Parse XML and form comment
+              // This is a simplified example - parsing can be improved
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '## 🔍 Migration Check Results\n\nReport saved in artifacts.'
+              });
+            } catch (error) {
+              console.log('Failed to create comment:', error);
+            }
+
+# Alternative option (soft mode):
+# If you want the check not to fail but still show issues,
+# replace the command in the "Run migsafe lint" step with:
+#   run: |
+#     migsafe analyze \
+#       --format text \
+#       --no-color \
+#       --severity warning || true
+#   continue-on-error: true
+# And add a step to generate HTML report:
+#   - name: Save HTML report
+#     if: always()
+#     run: |
+#       migsafe analyze \
+#         --format html \
+#         --output migsafe-report.html \
+#         --no-color || true

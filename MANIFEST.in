@@ -1,0 +1,28 @@
+# MANIFEST.in for including additional files in the package
+
+# Include README and documentation
+include README.md
+include CHANGELOG.md
+include CONTRIBUTING.md
+include LICENSE
+include SECURITY.md
+
+# Include configuration files
+include pyproject.toml
+include pytest.ini
+
+# Include examples (optional)
+recursive-include examples *.py *.md *.yml *.yaml
+
+# Include documentation
+recursive-include docs *.md
+
+# Exclude development files
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude .git*
+global-exclude *.swp
+global-exclude *.swo
+global-exclude *~
+

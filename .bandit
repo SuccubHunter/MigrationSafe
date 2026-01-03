@@ -1,0 +1,13 @@
+[bandit]
+# Excluded tests
+exclude_dirs = tests,test_,*_test.py,*_tests.py
+
+# Security level
+# 1: Low
+# 2: Medium
+# 3: High
+severity_level = 2
+confidence_level = 2
+
+# Ignored issues (project-specific can be added)
+skips = B101, B601

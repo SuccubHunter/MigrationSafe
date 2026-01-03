@@ -1,0 +1,83 @@
+# pre-commit hook configuration example for migsafe
+#
+# Copy this file to .pre-commit-hooks.yaml in the project root
+# or add to existing .pre-commit-config.yaml
+#
+# Installation:
+# 1. pip install pre-commit
+# 2. pre-commit install
+# 3. pre-commit run --all-files  # to check all files
+
+repos:
+  # Local hook for migsafe
+  - repo: local
+    hooks:
+      - id: migsafe-check
+        name: Check Alembic migrations with migsafe
+        entry: migsafe lint
+        language: system
+        types: [python]
+        # Check only migration files
+        files: ^(.*/)?(migrations|alembic/versions)/.*\.py$
+        args:
+          - --no-color
+          - --format
+          - text
+        # Optionally: can use --severity warning for soft mode
+        # args: ['--no-color', '--format', 'text', '--severity', 'warning']
+        pass_filenames: true
+        # If you want to check only changed files:
+        # always_run: false
+
+---
+# Alternative option: via shell script for more flexibility
+
+# Create file .git/hooks/pre-commit (or use pre-commit framework):
+#
+# #!/bin/bash
+# # Check migrations before commit
+# 
+# # Find changed migration files
+# changed_migrations=$(git diff --cached --name-only --diff-filter=ACM | grep -E '(migrations|alembic/versions)/.*\.py$')
+# 
+# if [ -z "$changed_migrations" ]; then
+#   exit 0
+# fi
+# 
+# echo "🔍 Checking migrations with migsafe..."
+# 
+# # Check only changed files
+# for file in $changed_migrations; do
+#   migsafe lint "$file" --no-color
+#   if [ $? -ne 0 ]; then
+#     echo "❌ Critical issues found in $file"
+#     echo "💡 Fix issues before commit or use --no-verify to skip"
+#     exit 1
+#   fi
+# done
+# 
+# echo "✅ All migrations are safe"
+# exit 0
+
+---
+# Example for .pre-commit-config.yaml using pip
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  # migsafe hook
+  - repo: local
+    hooks:
+      - id: migsafe
+        name: migsafe migration check
+        entry: bash -c 'migsafe lint --no-color "$@"' --
+        language: system
+        files: ^(.*/)?(migrations|alembic/versions)/.*\.py$
+        pass_filenames: true
+        require_serial: false

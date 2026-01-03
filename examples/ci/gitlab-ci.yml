@@ -1,0 +1,99 @@
+# migsafe GitLab CI integration example
+#
+# Copy this job to your .gitlab-ci.yml or create a separate file
+# and include it via include
+
+# Basic job for checking migrations
+check-migrations:
+  stage: test
+  image: python:3.11
+  before_script:
+    - pip install --upgrade pip
+    - pip install migsafe
+    # If using requirements.txt:
+    # - pip install -r requirements.txt
+  script:
+    # Strict mode: fails on critical issues
+    - migsafe lint --format junit --output migsafe-report.xml --no-color
+  artifacts:
+    when: always
+    reports:
+      junit: migsafe-report.xml
+    paths:
+      - migsafe-report.xml
+    expire_in: 1 week
+  only:
+    changes:
+      - "**/migrations/**/*.py"
+      - "**/alembic/versions/**/*.py"
+      - ".gitlab-ci.yml"
+
+---
+# Alternative option: with HTML report
+
+check-migrations-with-html:
+  stage: test
+  image: python:3.11
+  before_script:
+    - pip install --upgrade pip
+    - pip install migsafe
+  script:
+    # Generate both formats: JUnit for CI and HTML for viewing
+    - migsafe lint --format junit --output migsafe-report.xml --no-color
+    - migsafe analyze --format html --output migsafe-report.html --no-color || true
+  artifacts:
+    when: always
+    reports:
+      junit: migsafe-report.xml
+    paths:
+      - migsafe-report.xml
+      - migsafe-report.html
+    expire_in: 1 week
+  only:
+    changes:
+      - "**/migrations/**/*.py"
+
+---
+# Soft mode: warnings only, doesn't fail
+
+check-migrations-soft:
+  stage: test
+  image: python:3.11
+  before_script:
+    - pip install --upgrade pip
+    - pip install migsafe
+  script:
+    # Soft mode: shows issues but doesn't fail
+    - migsafe analyze --format text --no-color --severity warning || true
+    - migsafe analyze --format json --output migsafe-report.json --no-color || true
+  artifacts:
+    when: always
+    paths:
+      - migsafe-report.json
+    expire_in: 1 week
+  allow_failure: true  # Job doesn't block pipeline
+  only:
+    changes:
+      - "**/migrations/**/*.py"
+
+---
+# Integration into existing pipeline with caching
+
+check-migrations-cached:
+  stage: test
+  image: python:3.11
+  cache:
+    paths:
+      - .pip-cache/
+  before_script:
+    - pip install --upgrade pip
+    - pip install --cache-dir .pip-cache migsafe
+  script:
+    - migsafe lint --format junit --output migsafe-report.xml --no-color
+  artifacts:
+    when: always
+    reports:
+      junit: migsafe-report.xml
+  only:
+    changes:
+      - "**/migrations/**/*.py"
